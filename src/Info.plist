@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>com.justdevtutorials.wx_file_manager_project</string>
+    <string>com.jp_projects.wx_file_manager_project</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
     <key>CFBundlePackageType</key>

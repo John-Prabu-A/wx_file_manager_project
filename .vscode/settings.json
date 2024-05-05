@@ -3,5 +3,21 @@
         "editor.defaultFormatter": "ms-vscode.cpptools",
         "editor.tabSize": 4,
         "editor.formatOnSave": true
+    },
+    "files.associations": {
+        "*.ejs": "html",
+        "bit": "cpp",
+        "compare": "cpp",
+        "cstddef": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "optional": "cpp",
+        "limits": "cpp",
+        "memory": "cpp",
+        "new": "cpp",
+        "functional": "cpp",
+        "*.tcc": "cpp",
+        "concepts": "cpp",
+        "random": "cpp"
     }
 }
