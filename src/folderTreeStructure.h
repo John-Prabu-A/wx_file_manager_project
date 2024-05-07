@@ -1,18 +1,20 @@
+#pragma once
+
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 #include <wx/filename.h>
 #include <wx/dir.h>
 #include <wx/stdpaths.h>
 
-class FolderTreeStructureFrame : public wxFrame
+class FolderTreeStructurePanel : public wxPanel
 {
 public:
-    FolderTreeStructureFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
+    FolderTreeStructurePanel(wxWindow *parent, const wxSize &size = wxDefaultSize, wxWindowID id = wxID_ANY, const wxPoint &pos = wxDefaultPosition, long style = wxTAB_TRAVERSAL, const wxString &name = wxPanelNameStr);
 
 private:
     void PopulateTree(const wxString &path, const wxTreeItemId &parentItem);
     void OnItemActivated(wxTreeEvent &event);
-    wxString GetUserHomePath();
+
     wxTreeCtrl *m_treeCtrl;
     wxTreeItemId rootId;
 };
@@ -26,3 +28,5 @@ public:
 private:
     wxFileName m_fileName;
 };
+
+#include "folderTreeStructure.cpp"

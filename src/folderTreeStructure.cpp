@@ -1,18 +1,23 @@
-#include "folderTreeStructure.h"
+#pragma once
 
-FolderTreeStructureFrame::FolderTreeStructureFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
-    : wxFrame(NULL, wxID_ANY, title, pos, size)
+#include <wx/wx.h>
+#include <wx/treectrl.h>
+#include <wx/filename.h>
+#include <wx/dir.h>
+#include <wx/stdpaths.h>
+FolderTreeStructurePanel::FolderTreeStructurePanel(wxWindow *parent, const wxSize &size, wxWindowID id, const wxPoint &pos, long style, const wxString &name)
+    : wxPanel(parent, id, pos, size, style, name)
 {
     // Create the tree control
     m_treeCtrl = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
 
     // Bind double-click event to the item activated handler
-    m_treeCtrl->Bind(wxEVT_TREE_ITEM_ACTIVATED, &FolderTreeStructureFrame::OnItemActivated, this);
+    m_treeCtrl->Bind(wxEVT_TREE_ITEM_ACTIVATED, &FolderTreeStructurePanel::OnItemActivated, this);
 
     // Add root item
     rootId = m_treeCtrl->AddRoot("Root");
 
-    // get Current Users Home directory
+    // Get current user's home directory
     wxString rootPath = wxGetHomeDir();
 
     PopulateTree(rootPath, rootId);
@@ -23,7 +28,7 @@ FolderTreeStructureFrame::FolderTreeStructureFrame(const wxString &title, const 
     SetSizerAndFit(sizer);
 }
 
-void FolderTreeStructureFrame::PopulateTree(const wxString &path, const wxTreeItemId &parentItem)
+void FolderTreeStructurePanel::PopulateTree(const wxString &path, const wxTreeItemId &parentItem)
 {
     wxDir dir(path);
     if (!dir.IsOpened())
@@ -56,7 +61,7 @@ void FolderTreeStructureFrame::PopulateTree(const wxString &path, const wxTreeIt
     }
 }
 
-void FolderTreeStructureFrame::OnItemActivated(wxTreeEvent &event)
+void FolderTreeStructurePanel::OnItemActivated(wxTreeEvent &event)
 {
     wxTreeItemId itemId = event.GetItem();
     if (m_treeCtrl->ItemHasChildren(itemId))
@@ -70,9 +75,9 @@ void FolderTreeStructureFrame::OnItemActivated(wxTreeEvent &event)
         FileTreeItemData *fileData = dynamic_cast<FileTreeItemData *>(itemData);
         if (fileData)
         {
-            // handle the event to display the folder contents in main frame...
+            // Handle the event to display the folder contents in the main frame...
             wxFileName fileName = fileData->GetFileName();
-            wxLogMessage("Item path: %s", fileName.GetFullPath()); // handle pass
+            wxLogMessage("Item path: %s", fileName.GetFullPath()); // Handle pass
         }
     }
 }

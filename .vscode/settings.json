@@ -18,6 +18,19 @@
         "functional": "cpp",
         "*.tcc": "cpp",
         "concepts": "cpp",
-        "random": "cpp"
-    }
+        "random": "cpp",
+        "ostream": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "system_error": "cpp",
+        "string_view": "cpp",
+        "bitset": "cpp",
+        "variant": "cpp",
+        "regex": "cpp"
+    },
+    "files.autoSave": "onWindowChange"
 }
