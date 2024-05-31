@@ -186,8 +186,62 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
     propertiesSizer->Add(zoomOutButton, 0, wxEXPAND | wxALL, margin);
 
     quickAccessPanel = new FolderTreeStructurePanel(this, panel_left);
+    StyledButton *recentAccessButton = new StyledButton(panel_left, wxID_ANY, "Recently Accessed", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+
+    StyledButton *starredFilesAccessButton = new StyledButton(panel_left, wxID_ANY, "Starred Files", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    StyledButton *HomeButton = new StyledButton(panel_left, wxID_ANY, "Home", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    HomeButton->SetClickHandler([&]()
+                                {
+        NavigateTo(wxGetHomeDir());
+        OnFolderPathChange(wxGetHomeDir()); });
+    StyledButton *DesktopButton = new StyledButton(panel_left, wxID_ANY, "Desktop", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    DesktopButton->SetClickHandler([&]()
+                                   {
+        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Desktop));
+        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Desktop)); });
+    StyledButton *DocumentsButton = new StyledButton(panel_left, wxID_ANY, "Documents", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    DocumentsButton->SetClickHandler([&]()
+                                     {
+        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Documents));
+        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Documents)); });
+    StyledButton *DownloadsButton = new StyledButton(panel_left, wxID_ANY, "Downloads", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    DownloadsButton->SetClickHandler([&]()
+                                     {
+        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Downloads));
+        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Downloads)); });
+    StyledButton *MusicButton = new StyledButton(panel_left, wxID_ANY, "Music", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    MusicButton->SetClickHandler([&]()
+                                 {
+        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Music));
+        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Music)); });
+    StyledButton *PicturesButton = new StyledButton(panel_left, wxID_ANY, "Pictures", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    PicturesButton->SetClickHandler([&]()
+                                    {
+        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Pictures));
+        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Pictures)); });
+    StyledButton *VideosButton = new StyledButton(panel_left, wxID_ANY, "Videos", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    VideosButton->SetClickHandler([&]()
+                                  {
+        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Videos));
+        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Videos)); });
+    StyledButton *TrashButton = new StyledButton(panel_left, wxID_ANY, "Trash", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    // TrashButton->SetClickHandler([&]()
+    //                              {
+    //     NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Trash));
+    //     OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Trash)); });
     quickAccessSizer = new wxBoxSizer(wxVERTICAL);
+    quickAccessSizer->Add(recentAccessButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    quickAccessSizer->Add(starredFilesAccessButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    quickAccessSizer->Add(HomeButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    quickAccessSizer->Add(DesktopButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    quickAccessSizer->Add(DocumentsButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    quickAccessSizer->Add(DownloadsButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    quickAccessSizer->Add(MusicButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    quickAccessSizer->Add(PicturesButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    quickAccessSizer->Add(VideosButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    quickAccessSizer->Add(TrashButton, 0, wxEXPAND | wxRIGHT, margin - 1);
     quickAccessSizer->Add(quickAccessPanel, 1, wxEXPAND | wxRIGHT, margin);
+    // add border to quick access panel
 
     panel_top->SetBackgroundColour(BorderColor);
     panel_left->SetBackgroundColour(BorderColor);

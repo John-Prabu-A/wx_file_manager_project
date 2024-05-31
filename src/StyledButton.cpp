@@ -68,20 +68,19 @@ void StyledButton::OnLeftDown(wxMouseEvent &event)
 
 void StyledButton::OnLeftUp(wxMouseEvent &event)
 {
-    isPressed = false;
-    Refresh();
-    if (m_clickHandler)
+    if (isPressed && m_clickHandler)
     {
         std::cout << "OnLeftUP Called..." << std::endl;
         m_clickHandler();
     }
+    isPressed = false;
+    Refresh();
     event.Skip(false);
 }
 
 void StyledButton::OnPaint(wxPaintEvent &event)
 {
     wxAutoBufferedPaintDC dc(this);
-    // wxGCD dc(dc); // Ensure wx/graphics.h is included
 
     wxSize size = GetSize();
     wxRect rect(0, 0, size.GetWidth(), size.GetHeight());
@@ -108,7 +107,6 @@ void StyledButton::swap(wxColour &a, wxColour &b)
     a = b;
     b = temp;
 }
-
 void StyledButton::SetStyles(const wxColour &backgroundColor, const wxColour &foregroundColor,
                              const wxColour &borderColor, int borderRadius, int borderWidth, const wxFont &font, long additionalStyle)
 {
