@@ -1,11 +1,16 @@
 #pragma once
-
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 #include <wx/filename.h>
 #include <wx/dir.h>
 #include <wx/stdpaths.h>
-FolderTreeStructurePanel::FolderTreeStructurePanel(wxWindow *parent, const wxSize &size, wxWindowID id, const wxPoint &pos, long style, const wxString &name)
+FolderTreeStructurePanel::FolderTreeStructurePanel(
+    wxWindow *parent,
+    wxWindowID id = wxID_ANY,
+    const wxPoint &pos = wxDefaultPosition,
+    const wxSize &size = wxDefaultSize,
+    long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+    const wxString &name = wxASCII_STR(wxPanelNameStr))
     : wxPanel(parent, id, pos, size, style, name)
 {
     // Create the tree control
