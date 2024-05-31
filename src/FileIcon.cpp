@@ -14,19 +14,50 @@ FileIcon::FileIcon(wxWindow *parent, wxString fileName, wxString filePath, const
     {
         InitializeFileIconMap();
     }
-
-    // Get file extension
     wxString fileExtension = GetFileExtension(filePath);
-
-    // Get corresponding icon path
     wxString iconPath = GetIconPath(fileExtension);
-
-    // Load icon
     m_iconBitmap = new wxStaticBitmap(this, wxID_ANY, wxIcon(iconPath, wxBITMAP_TYPE_ICO));
 
-    // Display file name
-    m_text = new wxStaticText(this, wxID_ANY, m_fileName, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+    // add space in the file name if more than 12 characters without space
+    wxString newFileName = "";
+    // remove extension from m_fileName
+    wxString noExtFileName = m_fileName.substr(0, m_fileName.find_last_of("."));
 
+    if (noExtFileName.length() > 11)
+    {
+        bool isAddSpace = true;
+        for (int i = 0; i < noExtFileName.length(); i++)
+        {
+            if (i > 0 && i < noExtFileName.length() - 1)
+            {
+                if (noExtFileName[i] == ' ' || noExtFileName[i - 1] == ' ' || noExtFileName[i + 1] == ' ')
+                {
+                    isAddSpace = false;
+                }
+            }
+            if (i % 11 == 0 && i != 0)
+            {
+                if (isAddSpace)
+                {
+                    newFileName += " ";
+                    isAddSpace = true;
+                }
+            }
+            newFileName += noExtFileName[i];
+        }
+    }
+    else
+    {
+        newFileName = noExtFileName;
+    }
+    if (newFileName.length() > 23)
+    {
+        newFileName = newFileName.substr(0, 20);
+        newFileName += "...";
+    }
+
+    m_text = new wxStaticText(this, wxID_ANY, newFileName, wxDefaultPosition, wxSize(FromDIP(100), FromDIP(40)), wxALIGN_CENTER_HORIZONTAL | wxST_NO_AUTORESIZE);
+    m_text->Wrap(FromDIP(100));
     // Sizers to layout the components
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     sizer->AddStretchSpacer();
@@ -36,10 +67,8 @@ FileIcon::FileIcon(wxWindow *parent, wxString fileName, wxString filePath, const
     SetSizer(sizer);
 
     // Set fixed size for the sizer
-    SetMinSize(wxSize(FromDIP(100), FromDIP(70)));
-    SetMaxSize(wxSize(FromDIP(100), FromDIP(70)));
-
-    AdjustText();
+    SetMinSize(wxSize(FromDIP(100), FromDIP(120)));
+    SetMaxSize(wxSize(FromDIP(100), FromDIP(120)));
 
     // Binding events
     parent->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnLeftClick, this);
@@ -47,33 +76,6 @@ FileIcon::FileIcon(wxWindow *parent, wxString fileName, wxString filePath, const
     m_iconBitmap->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnIconClick, this);
     m_text->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnTextClick, this);
     m_text->Bind(wxEVT_LEFT_DCLICK, &FileIcon::OnTextDoubleClick, this);
-}
-
-void FileIcon::AdjustText()
-{
-    // Get the width of the static text control
-    int textWidth = m_text->GetSize().GetWidth();
-
-    // Wrap text to fit within the specified width
-    m_text->Wrap(textWidth);
-
-    // Measure text size to check if it fits
-    wxSize textSize = m_text->GetTextExtent(m_fileName);
-
-    // Check if text overflows and needs truncation
-    if (textSize.GetWidth() > textWidth)
-    {
-        // Truncate text and add ellipsis
-        wxString truncatedText = m_fileName;
-        while (textSize.GetWidth() > textWidth && !truncatedText.IsEmpty())
-        {
-            truncatedText.RemoveLast();
-            truncatedText.Replace("...", "...");
-            textSize = m_text->GetTextExtent(truncatedText);
-        }
-        truncatedText += "...";
-        m_text->SetLabel(truncatedText);
-    }
 }
 
 void FileIcon::SetIconOpacity(unsigned char alpha)

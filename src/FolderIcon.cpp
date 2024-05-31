@@ -15,9 +15,39 @@ FolderIcon::FolderIcon(wxWindow *parent, std::string folderName, wxString folder
     // Display folder icon
     m_iconBitmap = new wxStaticBitmap(this, wxID_ANY, m_iconNormal);
 
-    // Display folder name
-    m_text = new wxStaticText(this, wxID_ANY, m_folderName, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+    // add space in the folder name if more than 12 characters without space
+    wxString newFolderName = "";
+    if (m_folderName.length() > 11)
+    {
+        bool isAddSpace = true;
+        for (int i = 0; i < m_folderName.length(); i++)
+        {
+            if (i > 0 && i < m_folderName.length() - 1)
+            {
+                if (m_folderName[i] == ' ' || m_folderName[i - 1] == ' ' || m_folderName[i + 1] == ' ')
+                {
+                    isAddSpace = false;
+                }
+            }
+            if (i % 11 == 0 && i != 0)
+            {
+                if (isAddSpace)
+                {
+                    newFolderName += " ";
+                    isAddSpace = true;
+                }
+            }
+            newFolderName += m_folderName[i];
+        }
+    }
+    else
+    {
+        newFolderName = m_folderName;
+    }
 
+    // Display folder name
+    m_text = new wxStaticText(this, wxID_ANY, newFolderName, wxDefaultPosition, wxSize(FromDIP(100), FromDIP(50)), wxALIGN_CENTER_HORIZONTAL | wxST_NO_AUTORESIZE);
+    m_text->Wrap(FromDIP(100));
     // Sizers to layout the components
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     sizer->AddStretchSpacer();
@@ -27,10 +57,8 @@ FolderIcon::FolderIcon(wxWindow *parent, std::string folderName, wxString folder
     SetSizer(sizer);
 
     // Set fixed size for the sizer
-    SetMinSize(wxSize(FromDIP(100), FromDIP(70)));
-    SetMaxSize(wxSize(FromDIP(100), FromDIP(70)));
-
-    AdjustText();
+    SetMinSize(wxSize(FromDIP(100), FromDIP(120)));
+    SetMaxSize(wxSize(FromDIP(100), FromDIP(120)));
 
     // Binding events
     parent->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnLeftClick, this);
@@ -38,33 +66,6 @@ FolderIcon::FolderIcon(wxWindow *parent, std::string folderName, wxString folder
     m_iconBitmap->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnIconClick, this);
     m_text->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnTextClick, this);
     m_text->Bind(wxEVT_LEFT_DCLICK, &FolderIcon::OnTextDoubleClick, this);
-}
-
-void FolderIcon::AdjustText()
-{
-    // Get the width of the static text control
-    int textWidth = m_text->GetSize().GetWidth();
-
-    // Wrap text to fit within the specified width
-    m_text->Wrap(textWidth);
-
-    // Measure text size to check if it fits
-    wxSize textSize = m_text->GetTextExtent(m_folderName);
-
-    // Check if text overflows and needs truncation
-    if (textSize.GetWidth() > textWidth)
-    {
-        // Truncate text and add ellipsis
-        wxString truncatedText = m_folderName;
-        while (textSize.GetWidth() > textWidth && !truncatedText.IsEmpty())
-        {
-            truncatedText.RemoveLast();
-            truncatedText.Replace("...", "...");
-            textSize = m_text->GetTextExtent(truncatedText);
-        }
-        truncatedText += "...";
-        m_text->SetLabel(truncatedText);
-    }
 }
 
 void FolderIcon::SetIconOpacity(unsigned char alpha)

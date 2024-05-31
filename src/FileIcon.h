@@ -28,7 +28,6 @@ private:
     void OnTextClick(wxMouseEvent &event);
     void OnDoubleClick(wxMouseEvent &event);
     void OnTextDoubleClick(wxMouseEvent &event);
-    void AdjustText();
 
     wxStaticBitmap *m_iconBitmap;
     wxStaticText *m_text;
