@@ -1,23 +1,15 @@
-#pragma once
-#include <wx/wx.h>
-#include <wx/treectrl.h>
-#include <wx/filename.h>
-#include <wx/dir.h>
-#include <wx/stdpaths.h>
-FolderTreeStructurePanel::FolderTreeStructurePanel(
-    wxWindow *parent,
-    wxWindowID id = wxID_ANY,
-    const wxPoint &pos = wxDefaultPosition,
-    const wxSize &size = wxDefaultSize,
-    long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-    const wxString &name = wxASCII_STR(wxPanelNameStr))
-    : wxPanel(parent, id, pos, size, style, name)
+#include "folderTreeStructure.h"
+#include "MyFrame.h"
+
+wxBEGIN_EVENT_TABLE(FolderTreeStructurePanel, wxPanel)
+    EVT_TREE_ITEM_ACTIVATED(wxID_ANY, FolderTreeStructurePanel::OnItemActivated)
+        wxEND_EVENT_TABLE()
+
+            FolderTreeStructurePanel::FolderTreeStructurePanel(MyFrame *frame, wxWindow *parent, const wxSize &size, wxWindowID id, const wxPoint &pos, long style, const wxString &name)
+    : wxPanel(parent, id, pos, size, style, name), parentFrame(frame)
 {
     // Create the tree control
     m_treeCtrl = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
-
-    // Bind double-click event to the item activated handler
-    m_treeCtrl->Bind(wxEVT_TREE_ITEM_ACTIVATED, &FolderTreeStructurePanel::OnItemActivated, this);
 
     // Add root item
     rootId = m_treeCtrl->AddRoot("Root");
@@ -29,8 +21,13 @@ FolderTreeStructurePanel::FolderTreeStructurePanel(
 
     // Set up sizers
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->Add(m_treeCtrl, 1, wxEXPAND | wxALL, 5);
+    sizer->Add(m_treeCtrl, 1, wxEXPAND | wxALL, 0);
+    wxFont font(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+    m_treeCtrl->SetFont(font);
     SetSizerAndFit(sizer);
+
+    m_treeCtrl->Bind(wxEVT_TREE_ITEM_ACTIVATED, &FolderTreeStructurePanel::OnItemActivated, this);
+    m_treeCtrl->Bind(wxEVT_LEFT_DOWN, &FolderTreeStructurePanel::OnLeftDown, this);
 }
 
 void FolderTreeStructurePanel::PopulateTree(const wxString &path, const wxTreeItemId &parentItem)
@@ -53,7 +50,7 @@ void FolderTreeStructurePanel::PopulateTree(const wxString &path, const wxTreeIt
             continue;
         }
 
-        wxString fullPath = wxFileName::DirName(path).GetFullPath() + wxFileName::GetPathSeparator() + filename;
+        wxString fullPath = path + wxFileName::GetPathSeparator() + filename;
 
         if (wxFileName::DirExists(fullPath))
         {
@@ -61,7 +58,7 @@ void FolderTreeStructurePanel::PopulateTree(const wxString &path, const wxTreeIt
             wxTreeItemId itemId = m_treeCtrl->AppendItem(parentItem, filename, -1, -1, new FileTreeItemData(fullPath));
             PopulateTree(fullPath, itemId); // Recursively populate subdirectories
         }
-        // if you want file data also you can by adding else part.
+        // If you want file data also you can by adding else part.
         cont = dir.GetNext(&filename);
     }
 }
@@ -81,8 +78,27 @@ void FolderTreeStructurePanel::OnItemActivated(wxTreeEvent &event)
         if (fileData)
         {
             // Handle the event to display the folder contents in the main frame...
-            wxFileName fileName = fileData->GetFileName();
-            wxLogMessage("Item path: %s", fileName.GetFullPath()); // Handle pass
+            if (!parentFrame->backwardStack.empty())
+            {
+                if (parentFrame->backwardStack.top() != parentFrame->currentPath)
+                    parentFrame->backwardStack.push(parentFrame->currentPath);
+            }
+            else
+                parentFrame->backwardStack.push(parentFrame->currentPath);
+            parentFrame->currentPath = fileData->GetFilePath();
+            parentFrame->OnFolderPathChange(parentFrame->currentPath);
         }
     }
+}
+
+void FolderTreeStructurePanel::OnLeftDown(wxMouseEvent &event)
+{
+    // Check if any item is selected in the tree control
+    wxTreeItemId selection = m_treeCtrl->GetSelection();
+    if (selection.IsOk())
+    {
+        // Deselect the selected item
+        m_treeCtrl->Unselect();
+    }
+    event.Skip();
 }

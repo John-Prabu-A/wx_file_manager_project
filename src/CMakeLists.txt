@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
 
 project(wx_file_manager_project_core LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # hack for buggy CMake's FindwxWidgets script
@@ -14,7 +14,7 @@ set(wxWidgets_USE_STATIC 1)
 
 find_package(wxWidgets REQUIRED)
 
-set(SRCS main.cpp)
+set(SRCS main.cpp FolderIcon.cpp MyFrame.cpp BufferedBitmap.cpp folderTreeStructure.cpp FileIcon.cpp StyledButton.cpp)
 
 include(${wxWidgets_USE_FILE})
 

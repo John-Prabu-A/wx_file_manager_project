@@ -1,71 +1,134 @@
-#pragma once
-#include <wx/wx.h>
+#include "FolderIcon.h"
+#include "FileIcon.h"
 
-class FolderIcon : public wxPanel
+FolderIcon::FolderIcon(wxWindow *parent, std::string folderName, wxString folderPath, const wxSize &size, wxWindowID id,
+                       const wxPoint &pos, long style, const wxString &name)
+    : wxPanel(parent, id, pos, size, style, name),
+      m_folderName(folderName),
+      m_folderPath(folderPath),
+      m_active(false)
 {
-public:
-    FolderIcon(wxWindow *parent, std::string folderName, wxString folderPath, const wxSize &size = wxDefaultSize, wxWindowID id = wxID_ANY,
-               const wxPoint &pos = wxDefaultPosition,
-               long style = wxTAB_TRAVERSAL, const wxString &name = wxPanelNameStr)
-        : wxPanel(parent, id, pos, size, style, name),
-          m_folderName(folderName),
-          m_folderPath(folderPath),
-          m_active(false)
+    // Load icons
+    m_iconNormal = wxIcon("src/resource/folder_icon_normal.ico", wxBITMAP_TYPE_ICO);
+    m_iconActive = wxIcon("src/resource/folder_icon_active.ico", wxBITMAP_TYPE_ICO);
+
+    // Display folder icon
+    m_iconBitmap = new wxStaticBitmap(this, wxID_ANY, m_iconNormal);
+
+    // Display folder name
+    m_text = new wxStaticText(this, wxID_ANY, m_folderName, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+
+    // Sizers to layout the components
+    wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->AddStretchSpacer();
+    sizer->Add(m_iconBitmap, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
+    sizer->Add(m_text, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 5);
+    sizer->AddStretchSpacer();
+    SetSizer(sizer);
+
+    // Set fixed size for the sizer
+    SetMinSize(wxSize(FromDIP(100), FromDIP(70)));
+    SetMaxSize(wxSize(FromDIP(100), FromDIP(70)));
+
+    // Binding events
+    parent->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnLeftClick, this);
+    m_iconBitmap->Bind(wxEVT_LEFT_DCLICK, &FolderIcon::OnDoubleClick, this);
+    m_iconBitmap->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnIconClick, this);
+    m_text->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnTextClick, this);
+    m_text->Bind(wxEVT_LEFT_DCLICK, &FolderIcon::OnTextDoubleClick, this);
+}
+
+void FolderIcon::SetIconOpacity(unsigned char alpha)
+{
+    wxBitmap bmp = m_iconBitmap->GetBitmap();
+    wxImage img = bmp.ConvertToImage();
+    if (!img.HasAlpha())
     {
-        // Load icons
-        m_iconNormal = wxIcon("src/resource/folder_icon_normal.ico", wxBITMAP_TYPE_ICO);
-        m_iconActive = wxIcon("src/resource/folder_icon_active.ico", wxBITMAP_TYPE_ICO);
+        img.InitAlpha();
+    }
+    unsigned char *alphaData = img.GetAlpha();
+    if (!alphaData)
+    {
+        alphaData = new unsigned char[img.GetWidth() * img.GetHeight()];
+        memset(alphaData, alpha, img.GetWidth() * img.GetHeight());
+        img.SetAlpha(alphaData, true);
+    }
+    else
+    {
+        for (int y = 0; y < img.GetHeight(); ++y)
+        {
+            for (int x = 0; x < img.GetWidth(); ++x)
+            {
+                alphaData[y * img.GetWidth() + x] = alpha;
+            }
+        }
+    }
+    m_iconBitmap->SetBitmap(wxBitmap(img));
+    Refresh();
+}
 
-        // Display folder icon
-        m_iconBitmap = new wxStaticBitmap(this, wxID_ANY, m_iconNormal);
+bool FolderIcon::isActive()
+{
+    return FolderIcon::m_active;
+}
 
-        // Display folder name
-        m_text = new wxStaticText(this, wxID_ANY, m_folderName, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+void FolderIcon::Activate()
+{
+    FolderIcon::m_active = true;
+    this->SetBackgroundColour(wxColour(54, 192, 255, 100));
+    m_iconBitmap->SetIcon(m_iconActive);
+}
 
-        // Sizers to layout the components
-        wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-        sizer->AddStretchSpacer();
-        sizer->Add(m_iconBitmap, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
-        sizer->Add(m_text, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 5);
-        sizer->AddStretchSpacer();
-        SetSizer(sizer);
+void FolderIcon::Deactivate()
+{
+    FolderIcon::m_active = false;
+    this->SetBackgroundColour(wxNullColour);
+    m_iconBitmap->SetIcon(m_iconNormal);
+}
 
-        // Set fixed size for the sizer
-        SetMinSize(wxSize(70, 70));
-        SetMaxSize(wxSize(70, 70));
+wxString FolderIcon::GetFolderPath() const
+{
+    return m_folderPath;
+}
 
-        // Binding events
-        parent->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnLeftClick, this);
-        m_iconBitmap->Bind(wxEVT_LEFT_DCLICK, &FolderIcon::OnDoubleClick, this);
-        m_iconBitmap->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnIconClick, this);
-        m_text->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnTextClick, this);
-        m_text->Bind(wxEVT_LEFT_DCLICK, &FolderIcon::OnTextDoubleClick, this);
+void FolderIcon::SetFolderPath(wxString folderPath)
+{
+    m_folderPath = folderPath;
+}
+
+void FolderIcon::SetFolderName(wxString folderName)
+{
+    m_folderName = folderName;
+}
+
+wxString FolderIcon::GetFolderName() const
+{
+    return m_folderName;
+}
+
+void FolderIcon::OnLeftClick(wxMouseEvent &event)
+{
+    wxWindowList &children = GetParent()->GetChildren();
+    for (wxWindowList::iterator it = children.begin(); it != children.end(); ++it)
+    {
+        FolderIcon *folderIcon = dynamic_cast<FolderIcon *>(*it);
+        if (folderIcon)
+        {
+            folderIcon->Deactivate();
+        }
+        FileIcon *fileIcon = dynamic_cast<FileIcon *>(*it);
+        if (fileIcon)
+        {
+            fileIcon->Deactivate();
+        }
     }
 
-    void Activate()
-    {
-        m_active = true;
-        m_iconBitmap->SetIcon(m_iconActive);
-    }
+    event.Skip();
+}
 
-    void Deactivate()
-    {
-        m_active = false;
-        m_iconBitmap->SetIcon(m_iconNormal);
-    }
-
-    wxString GetFolderPath() const
-    {
-        return m_folderPath;
-    }
-    void SetFolderPath(wxString folderPath)
-    {
-        m_folderPath = folderPath;
-        return;
-    }
-
-private:
-    void OnLeftClick(wxMouseEvent &event)
+void FolderIcon::OnIconClick(wxMouseEvent &event)
+{
+    if (!FolderIcon::m_active)
     {
         wxWindowList &children = GetParent()->GetChildren();
         for (wxWindowList::iterator it = children.begin(); it != children.end(); ++it)
@@ -75,66 +138,53 @@ private:
             {
                 folderIcon->Deactivate();
             }
-        }
-    }
-
-    void OnIconClick(wxMouseEvent &event)
-    {
-        if (!m_active)
-        {
-            wxWindowList &children = GetParent()->GetChildren();
-            for (wxWindowList::iterator it = children.begin(); it != children.end(); ++it)
+            FileIcon *fileIcon = dynamic_cast<FileIcon *>(*it);
+            if (fileIcon)
             {
-                FolderIcon *folderIcon = dynamic_cast<FolderIcon *>(*it);
-                if (folderIcon)
-                {
-                    folderIcon->Deactivate();
-                }
+                fileIcon->Deactivate();
             }
-            Activate();
-            wxCommandEvent dummyEvent;
-            wxPostEvent(GetParent(), dummyEvent);
         }
+        Activate();
+        wxCommandEvent dummyEvent;
+        wxPostEvent(GetParent(), dummyEvent);
     }
+}
 
-    void OnTextClick(wxMouseEvent &event)
+void FolderIcon::OnTextClick(wxMouseEvent &event)
+{
+    if (!FolderIcon::m_active)
     {
-        if (!m_active)
+        wxWindowList &children = GetParent()->GetChildren();
+        for (wxWindowList::iterator it = children.begin(); it != children.end(); ++it)
         {
-            wxWindowList &children = GetParent()->GetChildren();
-            for (wxWindowList::iterator it = children.begin(); it != children.end(); ++it)
+            FolderIcon *folderIcon = dynamic_cast<FolderIcon *>(*it);
+            if (folderIcon)
             {
-                FolderIcon *folderIcon = dynamic_cast<FolderIcon *>(*it);
-                if (folderIcon)
-                {
-                    folderIcon->Deactivate();
-                }
+                folderIcon->Deactivate();
             }
-            Activate();
-            wxCommandEvent dummyEvent;
-            wxPostEvent(GetParent(), dummyEvent);
+            FileIcon *fileIcon = dynamic_cast<FileIcon *>(*it);
+            if (fileIcon)
+            {
+                fileIcon->Deactivate();
+            }
         }
+        Activate();
+        wxCommandEvent dummyEvent;
+        wxPostEvent(GetParent(), dummyEvent);
     }
+    event.Skip();
+}
 
-    void OnDoubleClick(wxMouseEvent &event)
-    {
-        wxCommandEvent folderEvent(wxEVT_COMMAND_MENU_SELECTED, GetId());
-        folderEvent.SetString(m_folderPath);
-        GetEventHandler()->ProcessEvent(folderEvent);
-    }
+void FolderIcon::OnDoubleClick(wxMouseEvent &event)
+{
+    wxCommandEvent folderEvent(wxEVT_COMMAND_MENU_SELECTED, GetId());
+    folderEvent.SetString(m_folderPath);
+    GetEventHandler()->ProcessEvent(folderEvent);
+}
 
-    void OnTextDoubleClick(wxMouseEvent &event)
-    {
-        wxCommandEvent folderEvent(wxEVT_COMMAND_MENU_SELECTED, GetId());
-        folderEvent.SetString(m_folderPath);
-        GetEventHandler()->ProcessEvent(folderEvent);
-    }
-
-    wxIcon m_iconNormal;
-    wxIcon m_iconActive;
-    wxStaticBitmap *m_iconBitmap;
-    wxStaticText *m_text;
-    wxString m_folderName;
-    wxString m_folderPath;
-    bool m_active;
-};
+void FolderIcon::OnTextDoubleClick(wxMouseEvent &event)
+{
+    wxCommandEvent folderEvent(wxEVT_COMMAND_MENU_SELECTED, GetId());
+    folderEvent.SetString(m_folderPath);
+    GetEventHandler()->ProcessEvent(folderEvent);
+}
