@@ -26,6 +26,7 @@ private:
     void OnTextClick(wxMouseEvent &event);
     void OnDoubleClick(wxMouseEvent &event);
     void OnTextDoubleClick(wxMouseEvent &event);
+    void AdjustText();
 
     wxIcon m_iconNormal;
     wxIcon m_iconActive;

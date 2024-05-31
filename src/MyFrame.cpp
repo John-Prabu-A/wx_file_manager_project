@@ -31,65 +31,67 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
     panel_right->SetScrollRate(10, 10);
 
     panel_top->SetMinSize(wxSize(-1, 50));
-    panel_left->SetMinSize(wxSize(300, 300));
+    panel_left->SetMinSize(wxSize(310, 300));
     panel_mid->SetMinSize(wxSize(300, 300));
     panel_right->SetMinSize(wxSize(300, 300));
 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(panel_top, 0, wxEXPAND);
-    mainSizer->Add(panel_bottom, 1, wxEXPAND);
+    mainSizer->Add(panel_bottom, 1, wxEXPAND | wxALL, 0);
 
     wxBoxSizer *sizer_bottom = new wxBoxSizer(wxHORIZONTAL);
-    sizer_bottom->Add(panel_left, 0, wxEXPAND | wxLEFT | wxRIGHT, margin);
+    sizer_bottom->Add(panel_left, 0, wxEXPAND, margin);
     sizer_bottom->Add(panel_mid, 1, wxEXPAND);
-    sizer_bottom->Add(panel_right, 0, wxEXPAND | wxLEFT | wxRIGHT, margin);
+    sizer_bottom->Add(panel_right, 0, wxEXPAND, margin);
     panel_bottom->SetSizerAndFit(sizer_bottom);
 
     top_grid = new wxGridBagSizer(margin, margin);
-    const int iconSize = FromDIP(32);
-    StyledButton *gotoParentButton = new StyledButton(panel_top, wxID_ANY, wxT("\u2191"), wxDefaultPosition, wxDefaultSize);
-    StyledButton *backButton = new StyledButton(panel_top, wxID_ANY, wxT("\u2190"), wxDefaultPosition, wxDefaultSize);
-    StyledButton *forwardButton = new StyledButton(panel_top, wxID_ANY, wxT("\u2192"), wxDefaultPosition, wxDefaultSize);
-    StyledButton *reloadButton = new StyledButton(panel_top, wxID_ANY, wxT("\u21BB"), wxDefaultPosition, wxDefaultSize);
+    const int iconWidth = FromDIP(65);
+    const int iconHeight = FromDIP(32);
+    StyledButton *gotoParentButton = new StyledButton(panel_top, wxID_ANY, wxT("\u2191"), wxDefaultPosition, wxSize(iconWidth, iconHeight));
+    StyledButton *backButton = new StyledButton(panel_top, wxID_ANY, wxT("\u2190"), wxDefaultPosition, wxSize(iconWidth, iconHeight));
+    StyledButton *forwardButton = new StyledButton(panel_top, wxID_ANY, wxT("\u2192"), wxDefaultPosition, wxSize(iconWidth, iconHeight));
+    StyledButton *reloadButton = new StyledButton(panel_top, wxID_ANY, wxT("\u21BB"), wxDefaultPosition, wxSize(iconWidth, iconHeight));
 
     // handle navigation button events
-    gotoParentButton->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event)
-                           {
+    gotoParentButton->SetClickHandler([&]()
+                                      {
         gotoParentDirectory();
         OnFolderPathChange(MyFrame::currentPath); });
 
-    backButton->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event)
-                     {
+    backButton->SetClickHandler([&]()
+                                {
         navigateBack();
         OnFolderPathChange(MyFrame::currentPath); });
 
-    forwardButton->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event)
-                        {
+    forwardButton->SetClickHandler([&]()
+                                   {
         navigateForward();
         OnFolderPathChange(MyFrame::currentPath); });
 
-    reloadButton->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event)
-                       { OnFolderPathChange(MyFrame::currentPath); });
+    reloadButton->SetClickHandler([&]()
+                                  { OnFolderPathChange(MyFrame::currentPath); });
 
     wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-    buttonSizer->Add(gotoParentButton, 0, wxLEFT | wxTOP, margin);
-    buttonSizer->Add(backButton, 0, wxLEFT | wxTOP, margin);
-    buttonSizer->Add(forwardButton, 0, wxLEFT | wxTOP, margin);
-    buttonSizer->Add(reloadButton, 0, wxLEFT | wxTOP, margin);
+    buttonSizer->Add(gotoParentButton, 0, wxTOP | wxLEFT, margin);
+    buttonSizer->Add(backButton, 0, wxTOP | wxLEFT, margin);
+    buttonSizer->Add(forwardButton, 0, wxTOP | wxLEFT, margin);
+    buttonSizer->Add(reloadButton, 0, wxTOP | wxLEFT, margin);
 
     nameText = new wxTextCtrl(panel_top, wxID_ANY);
     nameText->SetEditable(false);
 
     wxBoxSizer *nameFormSizer = new wxBoxSizer(wxHORIZONTAL);
-    nameFormSizer->Add(nameText, 3, wxEXPAND | wxLEFT | wxTOP, margin);
+    nameFormSizer->Add(nameText, 3, wxEXPAND | wxTOP, margin);
 
-    searchBar = new wxSearchCtrl(panel_top, wxID_ANY);
+    searchBar = new wxSearchCtrl(panel_top, wxID_ANY, "", wxDefaultPosition, wxSize(-1, iconHeight));
     searchBar->Bind(wxEVT_TEXT, &MyFrame::OnSearch, this);
-    searchButton = new StyledButton(panel_top, wxID_ANY, wxT(" Search "), wxDefaultPosition, wxDefaultSize);
-    searchButton->Bind(wxEVT_BUTTON, &MyFrame::OnSearchButton, this);
+    searchButton = new StyledButton(panel_top, wxID_ANY, wxT(" Search "), wxDefaultPosition, wxSize(FromDIP(100), iconHeight));
+    searchButton->SetClickHandler([&]()
+                                  { OnSearchButton(); });
     searchBar->ShowSearchButton(true);
     searchBar->SetDescriptiveText("Search");
-    searchBar->SetMinSize(wxSize(100, iconSize));
+    searchBar->SetMinSize(wxSize(100, iconHeight));
 
     searchResultList = new wxDataViewListCtrl(this, wxID_ANY);
     searchResultColumn = searchResultList->AppendTextColumn("Results");
@@ -97,7 +99,7 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
     nameFormSizer->Add(searchBar, 1, wxLEFT | wxTOP, margin);
     nameFormSizer->Add(searchButton, 0, wxRIGHT | wxLEFT | wxTOP, margin);
 
-    top_grid->Add(buttonSizer, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND | wxALIGN_LEFT);
+    top_grid->Add(buttonSizer, wxGBPosition(0, 0), wxGBSpan(1, 1), wxALIGN_LEFT);
     top_grid->Add(nameFormSizer, wxGBPosition(0, 1), wxGBSpan(1, 2), wxEXPAND | wxALIGN_CENTER_VERTICAL);
     top_grid->AddGrowableCol(1);
 
@@ -185,7 +187,10 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
 
     quickAccessPanel = new FolderTreeStructurePanel(this, panel_left);
     quickAccessSizer = new wxBoxSizer(wxVERTICAL);
-    quickAccessSizer->Add(quickAccessPanel, 1, wxEXPAND | wxRIGHT, 5);
+    quickAccessSizer->Add(quickAccessPanel, 1, wxEXPAND | wxRIGHT, margin);
+
+    panel_top->SetBackgroundColour(BorderColor);
+    panel_left->SetBackgroundColour(BorderColor);
 
     folderStructureSizer = new wxWrapSizer(wxHORIZONTAL);
     PopulateFolderIcons(rootPath, folderStructureSizer);
@@ -209,6 +214,23 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
         event.Skip(); });
 
     wxInitAllImageHandlers();
+}
+
+void MyFrame::setPropertiesIcon(const wxString &iconPath)
+{
+    wxBitmap newBitmap(iconPath, wxBITMAP_TYPE_ANY);
+    if (!newBitmap.IsOk())
+    {
+        wxLogError("Failed to load image: %s", iconPath);
+        return;
+    }
+
+    wxBitmap resizedBitmap = wxBitmap(ResizeImageToWidth(newBitmap, 100).ConvertToImage());
+    bitmapControl->SetBitmap(resizedBitmap);
+
+    // Optionally, you might need to refresh the control and layout
+    panel_right->Layout();
+    panel_right->Refresh();
 }
 
 void MyFrame::OnSearch(wxCommandEvent &event)
@@ -245,33 +267,44 @@ void MyFrame::OnSearch(wxCommandEvent &event)
     */
 }
 
-void MyFrame::OnSearchButton(wxCommandEvent &event)
+void MyFrame::OnSearchButton()
 {
+    std::cout << "Checkpoint 1" << std::endl;
     wxString searchQuery = searchBar->GetValue();
+    std::cout << "Checkpoint 2" << std::endl;
     searchResultList->DeleteAllItems();
-
+    std::cout << "Checkpoint 3" << std::endl;
     if (searchQuery != "")
     {
+        std::cout << "Checkpoint 4" << std::endl;
         searchFilesRecursively(searchQuery.ToStdString());
+        std::cout << "Checkpoint 5" << std::endl;
         for (const auto &item : allSearchItems)
         {
+            std::cout << "Checkpoint 6" << std::endl;
             if (item.Lower().Contains(searchQuery.Lower()))
             {
+                std::cout << "Checkpoint 7" << std::endl;
                 wxVector<wxVariant> data;
+                std::cout << "Checkpoint 8" << std::endl;
                 data.push_back(wxVariant(item));
+                std::cout << "Checkpoint 9" << std::endl;
                 searchResultList->AppendItem(data);
+                std::cout << "Checkpoint 10" << std::endl;
             }
         }
-
+        std::cout << "Checkpoint 11" << std::endl;
         // Show the result list and position it below the search control
         searchResultList->Show();
     }
     else
     {
+        std::cout << "Checkpoint 12" << std::endl;
         searchResultList->Hide();
     }
-
+    std::cout << "Checkpoint 13" << std::endl;
     UpdateSearchResultPosition();
+    std::cout << "Checkpoint 14" << std::endl;
 }
 
 void MyFrame::OnSize(wxSizeEvent &event)
@@ -328,7 +361,7 @@ void MyFrame::OnItemActivatedAtSearchResult(wxDataViewEvent &event)
     if (prefix == filePrefix)
     {
         wxString fileName = itemValue.Mid(7);
-        openFile(fileName);
+        OpenFile(fileName);
     }
     else if (prefix == dirPrefix)
     {
@@ -434,7 +467,7 @@ void MyFrame::PopulateFolderIcons(const wxString &path, wxSizer *sizer)
         fileIcon->Bind(wxEVT_COMMAND_MENU_SELECTED, [=](wxCommandEvent &event)
                        {
                            wxString filePath = fileIcon->GetFilePath();
-                           openFile(filePath); });
+                           OpenFile(filePath); });
     }
 }
 
@@ -502,6 +535,12 @@ std::vector<wxString> MyFrame::GetFilesAndFolders()
 
 Props MyFrame::GetFileProperties(const wxString &fileName)
 {
+    setPropertiesIcon("/home/jp/Downloads/wx_file_manager_project/src/resource/text_icon.png");
+    std::cout << "UpdatePropertiesUI...enter" << std::endl;
+    nameLabel->SetLabel("Name: ");
+    sizeLabel->SetLabel("Size: ");
+    lastModifiedLabel->SetLabel("Last Modified: ");
+    permissionsLabel->SetLabel("Permissions: ");
     Props newProps("", "", "", "");
     std::filesystem::path filePath = std::filesystem::path(currentPath.ToStdString()) / fileName.ToStdString();
     if (std::filesystem::exists(filePath))
@@ -529,40 +568,84 @@ Props MyFrame::GetFileProperties(const wxString &fileName)
     return newProps;
 }
 
-bool MyFrame::openFile(const wxString &fName)
+void MyFrame::OpenFile(const wxString &filePath)
 {
-    std::string fileName = fName.ToStdString();
-    std::filesystem::path filePath = std::filesystem::path(currentPath.ToStdString()) / fileName;
-    if (std::filesystem::exists(filePath) && !std::filesystem::is_directory(filePath))
+    wxFileName fileName(filePath);
+    if (!fileName.HasExt())
     {
-        if (std::filesystem::is_regular_file(filePath))
-        {
+        wxMessageBox("Not a regular File...", "Error", wxOK | wxICON_ERROR);
+        return;
+    }
+    wxFileType *fileType = wxTheMimeTypesManager->GetFileTypeFromExtension(wxFileName(filePath).GetExt());
 
-            recentlyAccessedFiles[wxString(filePath)] = std::chrono::system_clock::now();
-            recentlyAccessedFolders.push_back(wxFileName(wxString(filePath)).GetPath());
-            std::string command;
-#ifdef _WIN32
-            command = std::string("start '") + filePath.string() + "'";
-#elif __linux__
-            command = std::string("xdg-open '") + filePath.string() + "'";
-#elif __APPLE__
-            command = std::string("open '") + filePath.string() + "'";
-#endif
-            system(command.c_str());
-            return true;
+    if (fileType)
+    {
+        wxString mimeType;
+        fileType->GetMimeType(&mimeType);
+
+        if (mimeType == "application/x-executable")
+        {
+            wxExecute(filePath); // Run the executable
         }
         else
         {
-            std::cerr << "Error: Not a regular file!" << std::endl;
-            return false;
+            wxLaunchDefaultApplication(filePath); // Open with default application
         }
+
+        delete fileType;
     }
     else
     {
-        std::cerr << "File does not exist or is a directory." << std::endl;
-        return false;
+        wxMessageBox("Cannot determine file type.", "Error", wxOK | wxICON_ERROR);
     }
 }
+
+// bool MyFrame::OpenFile(const wxString &fName)
+// {
+//     std::string fileName = fName.ToStdString();
+//     std::filesystem::path filePath = std::filesystem::path(currentPath.ToStdString()) / fileName;
+//     if (std::filesystem::exists(filePath) && !std::filesystem::is_directory(filePath))
+//     {
+//         if (std::filesystem::is_regular_file(filePath))
+//         {
+
+//             recentlyAccessedFiles[wxString(filePath)] = std::chrono::system_clock::now();
+//             recentlyAccessedFolders.push_back(wxFileName(wxString(filePath)).GetPath());
+//             std::string command;
+// #ifdef _WIN32
+//             command = std::string("start '") + filePath.string() + "'";
+// #elif __linux__
+//             command = std::string("xdg-open '") + filePath.string() + "'";
+// #elif __APPLE__
+//             command = std::string("open '") + filePath.string() + "'";
+// #endif
+//             try
+//             {
+//                 std::cout << "Opening file..." << std::endl;
+//                 system(command.c_str());
+//                 std::cout << "file opened..." << std::endl;
+//                 return true;
+//             }
+//             catch (const std::exception &e)
+//             {
+//                 std::cout << "error occured..." << std::endl;
+//                 std::cerr << e.what() << '\n';
+//                 return false;
+//             }
+//         }
+//         else
+//         {
+//             std::cerr << "Error: Not a regular file!" << std::endl;
+//             wxMessageBox("Error: Not a regular file!", "Error", wxICON_ERROR);
+//             return false;
+//         }
+//     }
+//     else
+//     {
+//         std::cerr << "File does not exist or is a directory." << std::endl;
+//         return false;
+//     }
+// }
 
 void MyFrame::createFile(const wxString &fileName)
 {
@@ -942,6 +1025,7 @@ void MyFrame::OnShowContextMenu(wxContextMenuEvent &event)
         wxMenuItem *renameItem = menu.Append(wxID_ANY, "Rename");
         renameItem->Enable(false);
         menu.AppendSeparator();
+
         wxMenuItem *propertiesItem = menu.Append(wxID_ANY, "Properties");
         Bind(wxEVT_MENU, &MyFrame::OnProperties, this, propertiesItem->GetId());
     }
@@ -959,7 +1043,7 @@ void MyFrame::OnOpen(FolderIcon *folderIcon)
 void MyFrame::OnOpen(FileIcon *fileIcon)
 {
     wxString filePath = fileIcon->GetFilePath();
-    openFile(filePath);
+    OpenFile(filePath);
 }
 
 void MyFrame::OnCut(FolderIcon *folderIcon)
@@ -1085,9 +1169,7 @@ void MyFrame::OnProperties(FileIcon *fileIcon)
 {
     wxString fileName = fileIcon->GetFilePath();
     Props props = GetFileProperties(fileName);
-    wxString message = wxString::Format("Name: %s\nSize: %s\nLast Modified: %s\nPermissions: %s",
-                                        props.Name, props.Size, props.LastModified, props.Permissions);
-    wxMessageBox(message, "File Properties", wxOK | wxICON_INFORMATION);
+    UpdatePropertiesUI(props);
 }
 
 // void MyFrame::OnProperties(wxCommandEvent &event)
@@ -1182,6 +1264,12 @@ std::future<wxString> MyFrame::GetPermissionsAsync(const std::filesystem::path &
 
 Props MyFrame::GetDirectoryProperties(const wxString &dirName)
 {
+    setPropertiesIcon("/home/jp/Downloads/wx_file_manager_project/src/resource/folder_icon.png");
+    std::cout << "UpdatePropertiesUI...enter" << std::endl;
+    nameLabel->SetLabel("Name: ");
+    sizeLabel->SetLabel("Size: ");
+    lastModifiedLabel->SetLabel("Last Modified: ");
+    permissionsLabel->SetLabel("Permissions: ");
     Props newProps("", "", "", "");
     std::filesystem::path dirPath = std::filesystem::path(currentPath.ToStdString()) / dirName.ToStdString();
     std::cout << "Dir Path in Props : " << dirPath << std::endl;
@@ -1219,7 +1307,6 @@ Props MyFrame::GetDirectoryProperties(const wxString &dirName)
         std::cout << "Directory : " << dirPath << " does not exist." << std::endl;
     }
     std::cout << "checkpoint 12" << std::endl;
-    ShowPropertiesPanel();
     return newProps;
 }
 
@@ -1317,11 +1404,6 @@ void MyFrame::OnProperties(wxCommandEvent &event)
 
 void MyFrame::UpdatePropertiesUI(const Props &props)
 {
-    std::cout << "UpdatePropertiesUI...enter" << std::endl;
-    nameLabel->SetLabel("Name: ");
-    sizeLabel->SetLabel("Size: ");
-    lastModifiedLabel->SetLabel("Last Modified: ");
-    permissionsLabel->SetLabel("Permissions: ");
     try
     {
         std::cout << "Props Name : " << props.Name << std::endl;
@@ -1351,6 +1433,7 @@ void MyFrame::UpdatePropertiesUI(const Props &props)
         std::cerr << e.what() << '\n';
     }
 
+    ShowPropertiesPanel();
     std::cout << "UpdatePropertiesUI...exit" << std::endl;
     // Refresh the frame to ensure the changes are displayed
     this->Layout();

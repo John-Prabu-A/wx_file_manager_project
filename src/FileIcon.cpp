@@ -39,12 +39,41 @@ FileIcon::FileIcon(wxWindow *parent, wxString fileName, wxString filePath, const
     SetMinSize(wxSize(FromDIP(100), FromDIP(70)));
     SetMaxSize(wxSize(FromDIP(100), FromDIP(70)));
 
+    AdjustText();
+
     // Binding events
     parent->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnLeftClick, this);
     m_iconBitmap->Bind(wxEVT_LEFT_DCLICK, &FileIcon::OnDoubleClick, this);
     m_iconBitmap->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnIconClick, this);
     m_text->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnTextClick, this);
     m_text->Bind(wxEVT_LEFT_DCLICK, &FileIcon::OnTextDoubleClick, this);
+}
+
+void FileIcon::AdjustText()
+{
+    // Get the width of the static text control
+    int textWidth = m_text->GetSize().GetWidth();
+
+    // Wrap text to fit within the specified width
+    m_text->Wrap(textWidth);
+
+    // Measure text size to check if it fits
+    wxSize textSize = m_text->GetTextExtent(m_fileName);
+
+    // Check if text overflows and needs truncation
+    if (textSize.GetWidth() > textWidth)
+    {
+        // Truncate text and add ellipsis
+        wxString truncatedText = m_fileName;
+        while (textSize.GetWidth() > textWidth && !truncatedText.IsEmpty())
+        {
+            truncatedText.RemoveLast();
+            truncatedText.Replace("...", "...");
+            textSize = m_text->GetTextExtent(truncatedText);
+        }
+        truncatedText += "...";
+        m_text->SetLabel(truncatedText);
+    }
 }
 
 void FileIcon::SetIconOpacity(unsigned char alpha)

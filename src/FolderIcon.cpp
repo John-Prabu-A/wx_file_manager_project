@@ -30,12 +30,41 @@ FolderIcon::FolderIcon(wxWindow *parent, std::string folderName, wxString folder
     SetMinSize(wxSize(FromDIP(100), FromDIP(70)));
     SetMaxSize(wxSize(FromDIP(100), FromDIP(70)));
 
+    AdjustText();
+
     // Binding events
     parent->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnLeftClick, this);
     m_iconBitmap->Bind(wxEVT_LEFT_DCLICK, &FolderIcon::OnDoubleClick, this);
     m_iconBitmap->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnIconClick, this);
     m_text->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnTextClick, this);
     m_text->Bind(wxEVT_LEFT_DCLICK, &FolderIcon::OnTextDoubleClick, this);
+}
+
+void FolderIcon::AdjustText()
+{
+    // Get the width of the static text control
+    int textWidth = m_text->GetSize().GetWidth();
+
+    // Wrap text to fit within the specified width
+    m_text->Wrap(textWidth);
+
+    // Measure text size to check if it fits
+    wxSize textSize = m_text->GetTextExtent(m_folderName);
+
+    // Check if text overflows and needs truncation
+    if (textSize.GetWidth() > textWidth)
+    {
+        // Truncate text and add ellipsis
+        wxString truncatedText = m_folderName;
+        while (textSize.GetWidth() > textWidth && !truncatedText.IsEmpty())
+        {
+            truncatedText.RemoveLast();
+            truncatedText.Replace("...", "...");
+            textSize = m_text->GetTextExtent(truncatedText);
+        }
+        truncatedText += "...";
+        m_text->SetLabel(truncatedText);
+    }
 }
 
 void FolderIcon::SetIconOpacity(unsigned char alpha)

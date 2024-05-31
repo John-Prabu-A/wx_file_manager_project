@@ -40,6 +40,8 @@
 #include <functional>
 #include <future>
 #include <wx/msgdlg.h>
+
+#include <wx/mimetype.h>
 #include <unordered_map>
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -100,10 +102,11 @@ public:
     void deleteFile(const wxString &fileName);
     void createDirectory(const wxString &dirName);
     void createFile(const wxString &fileName);
-    bool openFile(const wxString &fileName);
+    void OpenFile(const wxString &filePath);
     std::vector<wxString> GetFilesAndFolders();
     Props GetFileProperties(const wxString &fileName);
     wxBitmap ResizeImageToWidth(const wxBitmap &originalBitmap, int newWidth);
+    void setPropertiesIcon(const wxString &iconPath);
 
     // ------------Getting Directory Properties Async -----------------------------------
     uintmax_t GetDirectorySize(const std::filesystem::path &dirPath);
@@ -175,17 +178,18 @@ private:
     wxTextCtrl *nameText;
     wxSlider *slider;
     const int iconSize = FromDIP(32);
+    wxColor BorderColor = wxColour(50, 50, 50);
 
     //----------SearchBar related Methods & Properties--------------
     wxSearchCtrl *searchBar;
-    wxButton *searchButton;
+    StyledButton *searchButton;
     wxDataViewListCtrl *searchResultList;
     wxDataViewColumn *searchResultColumn;
     wxArrayString allSearchItems;
 
     void OnItemActivatedAtSearchResult(wxDataViewEvent &event);
     void OnSearch(wxCommandEvent &event);
-    void OnSearchButton(wxCommandEvent &event);
+    void OnSearchButton();
     void OnSize(wxSizeEvent &event);
     void OnMove(wxMoveEvent &event);
     void UpdateSearchResultPosition();
