@@ -44,6 +44,11 @@ FolderIcon::FolderIcon(wxWindow *parent, std::string folderName, wxString folder
     {
         newFolderName = m_folderName;
     }
+    if (newFolderName.length() > 23)
+    {
+        newFolderName = newFolderName.substr(0, 20);
+        newFolderName += "...";
+    }
 
     // Display folder name
     m_text = new wxStaticText(this, wxID_ANY, newFolderName, wxDefaultPosition, wxSize(FromDIP(100), FromDIP(50)), wxALIGN_CENTER_HORIZONTAL | wxST_NO_AUTORESIZE);

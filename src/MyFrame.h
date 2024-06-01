@@ -48,8 +48,13 @@
 #include <windows.h>
 #include <shlobj.h>
 #include <shellapi.h>
-#elif defined(__linux__) || defined(__APPLE__) && defined(__MACH__)
+#elif defined(__linux__)
 #include <cstdlib>
+#include <unistd.h>
+#include <pwd.h>
+#elif defined(__APPLE__) && defined(__MACH__)
+#include <cstdlib>
+#include <CoreServices/CoreServices.h>
 #endif
 
 #include "FolderIcon.h"
@@ -57,6 +62,7 @@
 #include "BufferedBitmap.h"
 #include "folderTreeStructure.h"
 #include "StyledButton.h"
+// #include "Tries.h"
 
 class BufferedBitmap;
 class FolderIcon;
@@ -82,6 +88,7 @@ public:
     void HidePropertiesPanel();
     void ShowPropertiesPanel();
     void CreateRightPanel();
+    wxString GetTrashDirectory();
     void PopulateFolderIcons(const wxString &path, wxSizer *sizer);
     void UpdateFolders(wxCommandEvent &event);
     void OnFolderPathChange(wxString folderPath);

@@ -56,21 +56,26 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
     // handle navigation button events
     gotoParentButton->SetClickHandler([&]()
                                       {
+
+        if(currentPath == GetTrashDirectory()) return;
         gotoParentDirectory();
         OnFolderPathChange(MyFrame::currentPath); });
 
     backButton->SetClickHandler([&]()
                                 {
         navigateBack();
-        OnFolderPathChange(MyFrame::currentPath); });
+        OnFolderPathChange(MyFrame::currentPath); 
+        if(currentPath == GetTrashDirectory()) nameText->SetValue(wxString("Trash")); });
 
     forwardButton->SetClickHandler([&]()
                                    {
         navigateForward();
-        OnFolderPathChange(MyFrame::currentPath); });
+        OnFolderPathChange(MyFrame::currentPath);
+        if(currentPath == GetTrashDirectory()) nameText->SetValue(wxString("Trash")); });
 
     reloadButton->SetClickHandler([&]()
-                                  { OnFolderPathChange(MyFrame::currentPath); });
+                                  { OnFolderPathChange(MyFrame::currentPath);
+        if(currentPath == GetTrashDirectory()) nameText->SetValue(wxString("Trash")); });
 
     wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
     buttonSizer->Add(gotoParentButton, 0, wxTOP | wxLEFT, margin);
@@ -191,44 +196,31 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
     StyledButton *starredFilesAccessButton = new StyledButton(panel_left, wxID_ANY, "Starred Files", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     StyledButton *HomeButton = new StyledButton(panel_left, wxID_ANY, "Home", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     HomeButton->SetClickHandler([&]()
-                                {
-        NavigateTo(wxGetHomeDir());
-        OnFolderPathChange(wxGetHomeDir()); });
+                                { OnFolderPathChange(wxGetHomeDir()); });
     StyledButton *DesktopButton = new StyledButton(panel_left, wxID_ANY, "Desktop", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     DesktopButton->SetClickHandler([&]()
-                                   {
-        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Desktop));
-        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Desktop)); });
+                                   { OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Desktop)); });
     StyledButton *DocumentsButton = new StyledButton(panel_left, wxID_ANY, "Documents", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     DocumentsButton->SetClickHandler([&]()
-                                     {
-        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Documents));
-        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Documents)); });
+                                     { OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Documents)); });
     StyledButton *DownloadsButton = new StyledButton(panel_left, wxID_ANY, "Downloads", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     DownloadsButton->SetClickHandler([&]()
-                                     {
-        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Downloads));
-        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Downloads)); });
+                                     { OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Downloads)); });
     StyledButton *MusicButton = new StyledButton(panel_left, wxID_ANY, "Music", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     MusicButton->SetClickHandler([&]()
-                                 {
-        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Music));
-        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Music)); });
+                                 { OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Music)); });
     StyledButton *PicturesButton = new StyledButton(panel_left, wxID_ANY, "Pictures", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     PicturesButton->SetClickHandler([&]()
-                                    {
-        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Pictures));
-        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Pictures)); });
+                                    { OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Pictures)); });
     StyledButton *VideosButton = new StyledButton(panel_left, wxID_ANY, "Videos", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     VideosButton->SetClickHandler([&]()
-                                  {
-        NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Videos));
-        OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Videos)); });
+                                  { OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Videos)); });
     StyledButton *TrashButton = new StyledButton(panel_left, wxID_ANY, "Trash", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
-    // TrashButton->SetClickHandler([&]()
-    //                              {
-    //     NavigateTo(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Trash));
-    //     OnFolderPathChange(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Trash)); });
+    TrashButton->SetClickHandler([&]()
+                                 {
+        wxString trashPath = GetTrashDirectory();
+        OnFolderPathChange(trashPath);
+        nameText->SetValue(wxString("Trash")); });
     quickAccessSizer = new wxBoxSizer(wxVERTICAL);
     quickAccessSizer->Add(recentAccessButton, 0, wxEXPAND | wxRIGHT, margin - 1);
     quickAccessSizer->Add(starredFilesAccessButton, 0, wxEXPAND | wxRIGHT, margin - 1);
@@ -290,6 +282,7 @@ void MyFrame::setPropertiesIcon(const wxString &iconPath)
 void MyFrame::OnSearch(wxCommandEvent &event)
 {
     wxString searchQuery = searchBar->GetValue();
+    searchBar->SetValue("");
     searchResultList->DeleteAllItems();
 
     //---- hide list while no queries ----------------
@@ -325,6 +318,7 @@ void MyFrame::OnSearchButton()
 {
     std::cout << "Checkpoint 1" << std::endl;
     wxString searchQuery = searchBar->GetValue();
+    searchBar->SetValue("");
     std::cout << "Checkpoint 2" << std::endl;
     searchResultList->DeleteAllItems();
     std::cout << "Checkpoint 3" << std::endl;
@@ -420,7 +414,6 @@ void MyFrame::OnItemActivatedAtSearchResult(wxDataViewEvent &event)
     else if (prefix == dirPrefix)
     {
         wxString dirName = itemValue.Mid(6);
-        NavigateTo(dirName);
         OnFolderPathChange(dirName);
     }
 }
@@ -468,7 +461,17 @@ void MyFrame::PopulateFolderIcons(const wxString &path, wxSizer *sizer)
     }
 
     currentPath = path;
-    nameText->SetValue(path);
+    // prefix replace if prefix == GetTrashDirectory()
+    wxString cPath = path;
+    cPath.Replace(GetTrashDirectory(), wxString("Trash"), true);
+    cPath.Replace(wxGetHomeDir(), wxString("Home"), true);
+    cPath.Replace(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Desktop), wxString("Desktop"), true);
+    cPath.Replace(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Downloads), wxString("Downloads"), true);
+    cPath.Replace(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Documents), wxString("Documents"), true);
+    cPath.Replace(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Music), wxString("Music"), true);
+    cPath.Replace(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Pictures), wxString("Pictures"), true);
+    cPath.Replace(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir::Dir_Videos), wxString("Videos"), true);
+    nameText->SetValue(cPath);
 
     sizer->Clear(true);
 
@@ -1010,16 +1013,23 @@ void MyFrame::OnShowContextMenu(wxContextMenuEvent &event)
     {
         wxMenuItem *openItem = menu.Append(wxID_ANY, "Open");
         Bind(wxEVT_MENU, [this, activeFolderIcon](wxCommandEvent &event)
-             { OnOpen(activeFolderIcon); }, openItem->GetId());
+             { OnOpen(activeFolderIcon);
+             event.Skip(false); }, openItem->GetId());
         wxMenuItem *cutItem = menu.Append(wxID_ANY, "Cut");
         Bind(wxEVT_MENU, [this, activeFolderIcon](wxCommandEvent &event)
-             { OnCut(activeFolderIcon); }, cutItem->GetId());
+             { OnCut(activeFolderIcon); 
+             std::cout << "cut check..." << std::endl; 
+             event.Skip(false); }, cutItem->GetId());
         wxMenuItem *copyItem = menu.Append(wxID_ANY, "Copy");
         Bind(wxEVT_MENU, [this, activeFolderIcon](wxCommandEvent &event)
-             { OnCopy(activeFolderIcon); }, copyItem->GetId());
+             { OnCopy(activeFolderIcon); 
+             std::cout << "copy check..." << std::endl; 
+             event.Skip(false); }, copyItem->GetId());
         wxMenuItem *pasteItem = menu.Append(wxID_ANY, "Paste");
-        Bind(wxEVT_MENU, [this, activeFolderIcon](wxCommandEvent &)
-             { OnPaste(activeFolderIcon->GetFolderPath()); });
+        Bind(wxEVT_MENU, [this, activeFolderIcon](wxCommandEvent &event)
+             { OnPaste(activeFolderIcon->GetFolderPath()); 
+             std::cout << "paste check...1" << std::endl;
+             event.Skip(false); }, pasteItem->GetId());
         pasteItem->Enable(isCut || !copyBuffer.IsEmpty());
 
         menu.AppendSeparator();
@@ -1041,13 +1051,16 @@ void MyFrame::OnShowContextMenu(wxContextMenuEvent &event)
              { OnOpen(activeFileIcon); }, openItem->GetId());
         wxMenuItem *cutItem = menu.Append(wxID_ANY, "Cut");
         Bind(wxEVT_MENU, [this, activeFileIcon](wxCommandEvent &event)
-             { OnCut(activeFileIcon); }, cutItem->GetId());
+             { OnCut(activeFileIcon); 
+             std::cout << "cut check..." << std::endl; }, cutItem->GetId());
         wxMenuItem *copyItem = menu.Append(wxID_ANY, "Copy");
         Bind(wxEVT_MENU, [this, activeFileIcon](wxCommandEvent &event)
-             { OnCopy(activeFileIcon); }, copyItem->GetId());
+             { OnCopy(activeFileIcon); 
+             std::cout << "copy check..." << std::endl; }, copyItem->GetId());
         wxMenuItem *pasteItem = menu.Append(wxID_ANY, "Paste");
         Bind(wxEVT_MENU, [this, activeFileIcon](wxCommandEvent &)
-             { OnPaste(currentPath); }, pasteItem->GetId());
+             { OnPaste(currentPath); 
+             std::cout << "paste check...2" << std::endl; }, pasteItem->GetId());
         pasteItem->Enable(isCut || !copyBuffer.IsEmpty());
         menu.AppendSeparator();
         wxMenuItem *deleteItem = menu.Append(wxID_ANY, "Delete");
@@ -1058,7 +1071,7 @@ void MyFrame::OnShowContextMenu(wxContextMenuEvent &event)
              { OnRename(activeFileIcon); }, renameItem->GetId());
         menu.AppendSeparator();
         wxMenuItem *propertiesItem = menu.Append(wxID_ANY, "Properties");
-        Bind(wxEVT_MENU, [this, activeFileIcon](wxCommandEvent &)
+        Bind(wxEVT_MENU, [this, activeFileIcon](wxCommandEvent &event)
              { OnProperties(activeFileIcon); }, propertiesItem->GetId());
     }
     else
@@ -1071,7 +1084,10 @@ void MyFrame::OnShowContextMenu(wxContextMenuEvent &event)
         copyItem->Enable(false);
         wxMenuItem *pasteItem = menu.Append(wxID_ANY, "Paste");
         Bind(wxEVT_MENU, [this](wxCommandEvent &)
-             { OnPaste(currentPath); }, pasteItem->GetId());
+             { OnPaste(currentPath);
+             std::cout << ((isCut || !copyBuffer.IsEmpty()) ?  "paste check... True" : "False" )<< std::endl; }, pasteItem->GetId());
+
+        std::cout << "paste check...3" << std::endl;
         pasteItem->Enable(isCut || !copyBuffer.IsEmpty());
         menu.AppendSeparator();
         wxMenuItem *deleteItem = menu.Append(wxID_ANY, "Delete");
@@ -1519,4 +1535,45 @@ void MyFrame::MakePropertiesPanelTextEmpty()
         permissionsValue->SetLabel("");
     }
     HidePropertiesPanel();
+}
+
+wxString MyFrame::GetTrashDirectory()
+{
+    wxString trashPath;
+
+#ifdef __WXMSW__
+    PWSTR path = NULL;
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RecycleBinFolder, 0, NULL, &path)))
+    {
+        trashPath = wxString(path);
+        CoTaskMemFree(path);
+    }
+    else
+    {
+        trashPath = wxT("C:\\$Recycle.Bin");
+    }
+#elif defined(__WXGTK__)
+    const char *homeDir;
+    if ((homeDir = getenv("HOME")) == NULL)
+    {
+        homeDir = getpwuid(getuid())->pw_dir;
+    }
+    trashPath = wxString::Format(wxT("%s/.local/share/Trash/files"), homeDir);
+#elif defined(__WXMAC__)
+    FSRef trashRef;
+    if (FSFindFolder(kUserDomain, kTrashFolderType, kDontCreateFolder, &trashRef) == noErr)
+    {
+        char path[1024];
+        if (FSRefMakePath(&trashRef, (UInt8 *)&path, sizeof(path)) == noErr)
+        {
+            trashPath = wxString(path);
+        }
+    }
+    if (trashPath.IsEmpty())
+    {
+        trashPath = wxT("~/Trash");
+    }
+#endif
+
+    return trashPath;
 }
