@@ -303,10 +303,12 @@ void MyFrame::MakeTrie(wxString path)
         wxString fullPath = path + wxFileName::GetPathSeparator() + filename;
         trie.insert(std::string(fullPath.mb_str()));
 
-        if (wxDirExists(fullPath))
-        {
-            MakeTrie(fullPath);
-        }
+        // for recursive insert
+
+        //  if (wxDirExists(fullPath))
+        //  {
+        //      MakeTrie(fullPath);
+        //  }
 
         cont = dir.GetNext(&filename);
     }
@@ -314,7 +316,7 @@ void MyFrame::MakeTrie(wxString path)
 
 void MyFrame::SearchWithTrie()
 {
-    wxString prefix = searchBar->GetValue();
+    wxString prefix = currentPath + wxFileName::GetPathSeparator() + searchBar->GetValue();
     std::vector<std::string> results = trie.searchWithPrefix(std::string(prefix.mb_str()));
     if (prefix != "")
     {
@@ -345,6 +347,7 @@ void MyFrame::SearchWithTrie()
     {
         searchResultList->Hide();
     }
+    UpdateSearchResultPosition();
 }
 
 void MyFrame::OnSearch(wxCommandEvent &event)
