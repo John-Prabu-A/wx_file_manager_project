@@ -62,7 +62,7 @@
 #include "BufferedBitmap.h"
 #include "folderTreeStructure.h"
 #include "StyledButton.h"
-// #include "Tries.h"
+#include "Trie.h"
 
 class BufferedBitmap;
 class FolderIcon;
@@ -92,6 +92,7 @@ public:
     void PopulateFolderIcons(const wxString &path, wxSizer *sizer);
     void UpdateFolders(wxCommandEvent &event);
     void OnFolderPathChange(wxString folderPath);
+    void MakeTrie(wxString path);
     void displayDirectoryProperties(const wxString &dirName);
     bool setFilePermissions(const wxString &filename, int permissions);
     void displayRecentlyAccessedFiles();
@@ -158,6 +159,7 @@ private:
     wxString getPermissions(std::filesystem::perms p) const;
     wxString formatSize(uintmax_t size);
     uintmax_t GetDirectorySize(const wxString &dirPath);
+    Trie trie;
 
     wxBoxSizer *mainSizer;
     wxBoxSizer *sizer;
@@ -199,6 +201,7 @@ private:
     void OnItemActivatedAtSearchResult(wxDataViewEvent &event);
     void OnSearch(wxCommandEvent &event);
     void OnSearchButton();
+    void SearchWithTrie();
     void OnSize(wxSizeEvent &event);
     void OnMove(wxMoveEvent &event);
     void UpdateSearchResultPosition();

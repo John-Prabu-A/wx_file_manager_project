@@ -14,7 +14,7 @@ set(wxWidgets_USE_STATIC 1)
 
 find_package(wxWidgets REQUIRED)
 
-set(SRCS main.cpp FolderIcon.cpp MyFrame.cpp BufferedBitmap.cpp folderTreeStructure.cpp FileIcon.cpp StyledButton.cpp)
+set(SRCS main.cpp FolderIcon.cpp MyFrame.cpp BufferedBitmap.cpp folderTreeStructure.cpp FileIcon.cpp StyledButton.cpp TrieNode.cpp Trie.cpp)
 
 include(${wxWidgets_USE_FILE})
 

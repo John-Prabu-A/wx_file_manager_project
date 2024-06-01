@@ -93,7 +93,9 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
     searchBar->Bind(wxEVT_TEXT, &MyFrame::OnSearch, this);
     searchButton = new StyledButton(panel_top, wxID_ANY, wxT(" Search "), wxDefaultPosition, wxSize(FromDIP(100), iconHeight));
     searchButton->SetClickHandler([&]()
-                                  { OnSearchButton(); });
+                                  { 
+                                    // OnSearchButton();
+                                    SearchWithTrie(); });
     searchBar->ShowSearchButton(true);
     searchBar->SetDescriptiveText("Search");
     searchBar->SetMinSize(wxSize(100, iconHeight));
@@ -279,11 +281,79 @@ void MyFrame::setPropertiesIcon(const wxString &iconPath)
     panel_right->Refresh();
 }
 
+void MyFrame::MakeTrie(wxString path)
+{
+    if (!wxDirExists(path))
+    {
+        wxLogError("The directory does not exist: %s", path);
+        return;
+    }
+
+    wxDir dir(path);
+    if (!dir.IsOpened())
+    {
+        wxLogError("Failed to open directory: %s", path);
+        return;
+    }
+
+    wxString filename;
+    bool cont = dir.GetFirst(&filename);
+    while (cont)
+    {
+        wxString fullPath = path + wxFileName::GetPathSeparator() + filename;
+        trie.insert(std::string(fullPath.mb_str()));
+
+        if (wxDirExists(fullPath))
+        {
+            MakeTrie(fullPath);
+        }
+
+        cont = dir.GetNext(&filename);
+    }
+}
+
+void MyFrame::SearchWithTrie()
+{
+    wxString prefix = searchBar->GetValue();
+    std::vector<std::string> results = trie.searchWithPrefix(std::string(prefix.mb_str()));
+    if (prefix != "")
+    {
+        searchResultList->DeleteAllItems();
+        for (const auto &result : results)
+        {
+            allSearchItems.Add(result);
+        }
+        for (const auto &item : allSearchItems)
+        {
+            std::cout << "Checkpoint 6" << std::endl;
+            if (item.Lower().Contains(prefix.Lower()))
+            {
+                std::cout << "Checkpoint 7" << std::endl;
+                wxVector<wxVariant> data;
+                std::cout << "Checkpoint 8" << std::endl;
+                data.push_back(wxVariant(item));
+                std::cout << "Checkpoint 9" << std::endl;
+                searchResultList->AppendItem(data);
+                std::cout << "Checkpoint 10" << std::endl;
+            }
+        }
+        std::cout << "Checkpoint 11" << std::endl;
+        // Show the result list and position it below the search control
+        searchResultList->Show();
+    }
+    else
+    {
+        searchResultList->Hide();
+    }
+}
+
 void MyFrame::OnSearch(wxCommandEvent &event)
 {
+    std::cout << "onSearch...1 ";
     wxString searchQuery = searchBar->GetValue();
-    searchBar->SetValue("");
-    searchResultList->DeleteAllItems();
+
+    // searchBar->SetValue("");
+    // searchResultList->DeleteAllItems();
 
     //---- hide list while no queries ----------------
     searchResultList->Hide();
@@ -530,6 +600,7 @@ void MyFrame::PopulateFolderIcons(const wxString &path, wxSizer *sizer)
 
 void MyFrame::OnFolderPathChange(wxString folderPath)
 {
+    std::async(std::launch::async, &MyFrame::MakeTrie, this, folderPath);
     NavigateTo(folderPath);
     PopulateFolderIcons(folderPath, folderStructureSizer);
 }
