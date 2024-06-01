@@ -220,14 +220,37 @@ void FileIcon::OnTextDoubleClick(wxMouseEvent &event)
 
 void FileIcon::InitializeFileIconMap()
 {
-    // Add mappings for file extensions and corresponding icon paths
     fileIconMap["txt"] = "src/resource/text_icon.png";
-    // fileIconMap["doc"] = "src/resource/word_icon.ico";
-    // fileIconMap["pdf"] = "src/resource/pdf_icon.ico";
-    // fileIconMap["jpg"] = "src/resource/image_icon.ico";
-    // fileIconMap["png"] = "src/resource/image_icon.ico";
-    // fileIconMap["xlsx"] = "src/resource/excel_icon.ico";
-    // fileIconMap["pptx"] = "src/resource/powerpoint_icon.ico";
+    fileIconMap["doc"] = "src/resource/libreoffice-writer.png";
+    fileIconMap["docx"] = "src/resource/libreoffice-writer.png";
+    fileIconMap["pdf"] = "src/resource/org.gtkhash.gtkhash.png";
+    fileIconMap["jpg"] = "src/resource/rygel.png";
+    fileIconMap["png"] = "src/resource/rygel.png";
+    fileIconMap["xlsx"] = "src/resource/libreoffice-calc.png";
+    fileIconMap["pptx"] = "src/resource/libreoffice-impress.png";
+    fileIconMap["xls"] = "src/resource/libreoffice-calc.png";
+    fileIconMap["ppt"] = "src/resource/libreoffice-impress.png";
+    fileIconMap["odt"] = "src/resource/libreoffice-writer.png";
+    fileIconMap["ods"] = "src/resource/libreoffice-calc.png";
+    fileIconMap["odp"] = "src/resource/libreoffice-impress.png";
+    fileIconMap["csv"] = "src/resource/libreoffice-calc.png";
+    fileIconMap["gif"] = "src/resource/rygel.png";
+    fileIconMap["bmp"] = "src/resource/rygel.png";
+    fileIconMap["tif"] = "src/resource/rygel.png";
+    fileIconMap["tiff"] = "src/resource/rygel.png";
+    fileIconMap["zip"] = "src/resource/archive.png";
+    fileIconMap["rar"] = "src/resource/archive.png";
+    fileIconMap["tar"] = "src/resource/archive.png";
+    fileIconMap["gz"] = "src/resource/archive.png";
+    fileIconMap["bz2"] = "src/resource/archive.png";
+    fileIconMap["mp3"] = "src/resource/vlc.png";
+    fileIconMap["wav"] = "src/resource/vlc.png";
+    fileIconMap["avi"] = "src/resource/vlc.png";
+    fileIconMap["mp4"] = "src/resource/vlc.png";
+    fileIconMap["mkv"] = "src/resource/vlc.png";
+    fileIconMap["mov"] = "src/resource/vlc.png";
+    fileIconMap["flv"] = "src/resource/vlc.png";
+    fileIconMap["wmv"] = "src/resource/vlc.png";
 }
 
 wxString FileIcon::GetFileExtension(wxString filePath)

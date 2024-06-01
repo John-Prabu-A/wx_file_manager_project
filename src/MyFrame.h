@@ -84,23 +84,15 @@ class MyFrame : public wxFrame
 {
 public:
     MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, const wxString &path = "");
-    // void SetScaledImage(const wxImage &image, bool isDefaultPath = false);
-    // void OnResize(wxSizeEvent &event);
-    void HidePropertiesPanel();
-    void ShowPropertiesPanel();
-    void CreateRightPanel();
-    wxString GetTrashDirectory();
-    void PopulateFolderIcons(const wxString &path, wxSizer *sizer);
-    void OnFolderPathChange(wxString folderPath);
-    void MakeTrie(wxString path);
-    bool setFilePermissions(const wxString &filename, int permissions);
+
+    // Navigation functions
     void navigateToHome();
     void gotoParentDirectory();
     void navigateForward();
     void navigateBack();
     void NavigateTo(const wxString &path);
-    void searchFilesRecursively(const wxString &query);
-    void searchFilesRecursively(const std::string &query);
+
+    // File and directory operations
     void renameDirectory(const wxString &oldName, const wxString &newName);
     void renameFile(const wxString &oldName, const wxString &newName);
     void deleteDirectory(const wxString &dirName);
@@ -109,26 +101,46 @@ public:
     void createFile(const wxString &fileName);
     void OpenFile(const wxString &filePath);
     std::vector<wxString> GetFilesAndFolders();
-    Props GetFileProperties(const wxString &fileName);
-    wxBitmap ResizeImageToWidth(const wxBitmap &originalBitmap, int newWidth);
-    void setPropertiesIcon(const wxString &iconPath);
+    bool setFilePermissions(const wxString &filename, int permissions);
     bool CopyFile(const wxString &sourceFile, const wxString &destFile);
     bool CopyDirectory(const wxString &sourceDir, const wxString &destDir);
 
-    // ------------Getting Directory Properties Async -----------------------------------
+    // Properties panel functions
+    void HidePropertiesPanel();
+    void ShowPropertiesPanel();
+    void CreateRightPanel();
+    Props GetFileProperties(const wxString &fileName);
+    Props GetDirectoryProperties(const wxString &dirName);
+    void OnProperties(wxCommandEvent &event);
+    void UpdatePropertiesUI(const Props &props);
+    void MakePropertiesPanelTextEmpty();
+
+    // Asynchronous properties retrieval
     uintmax_t GetDirectorySize(const std::filesystem::path &dirPath);
     std::future<wxString> GetDirectorySizeAsync(const std::filesystem::path &dirPath);
     std::future<wxString> GetLastWriteTimeAsync(const std::filesystem::path &dirPath);
     std::future<wxString> GetPermissionsAsync(const std::filesystem::path &dirPath);
 
-    Props GetDirectoryProperties(const wxString &dirName);
+    // Utility functions
+    wxString GetTrashDirectory();
+    void PopulateFolderIcons(const wxString &path, wxSizer *sizer);
+    void OnFolderPathChange(wxString folderPath);
+    void MakeTrie(wxString path);
+    wxBitmap ResizeImageToWidth(const wxBitmap &originalBitmap, int newWidth);
+    void setPropertiesIcon(const wxString &iconPath);
+    wxString formatTime(std::filesystem::file_time_type ftime);
+    wxString getPermissions(std::filesystem::perms p) const;
+    wxString formatSize(uintmax_t size);
 
-    void OnProperties(wxCommandEvent &event);
-    void UpdatePropertiesUI(const Props &props);
-    void MakePropertiesPanelTextEmpty();
-    //------------------------------------------------------------------------------------
+    // Search functionality
+    void searchFilesRecursively(const wxString &query);
+    void searchFilesRecursively(const std::string &query);
+    void OnSearch(wxCommandEvent &event);
+    void OnSearchButton();
+    void SearchWithTrie();
+    void OnItemActivatedAtSearchResult(wxDataViewEvent &event);
 
-    //---------context menu functions ----------------------------------------------------
+    // Context menu functions
     void OnShowContextMenu(wxContextMenuEvent &event);
     void OnOpen(FolderIcon *folderIcon);
     void OnOpen(FileIcon *fileIcon);
@@ -145,19 +157,13 @@ public:
     void OnProperties(FileIcon *fileIcon);
     void OnNewFolder(wxCommandEvent &event);
     void OnNewFile(wxCommandEvent &event);
-    //------------------------------------------------------------------------------------
 
     friend class FolderTreeStructurePanel;
 
 private:
     wxDECLARE_EVENT_TABLE();
 
-    wxString formatTime(std::filesystem::file_time_type ftime);
-    wxString getPermissions(std::filesystem::perms p) const;
-    wxString formatSize(uintmax_t size);
-    uintmax_t GetDirectorySize(const wxString &dirPath);
-    Trie trie;
-
+    // UI components
     wxBoxSizer *mainSizer;
     wxBoxSizer *sizer;
     BufferedBitmap *bitmap;
@@ -188,36 +194,33 @@ private:
     const int iconSize = FromDIP(32);
     wxColor BorderColor = wxColour(50, 50, 50);
 
-    //----------SearchBar related Methods & Properties--------------
+    // Search bar components
     wxSearchCtrl *searchBar;
     StyledButton *searchButton;
     wxScrolledWindow *scrolledWindow;
     wxDataViewListCtrl *searchResultList;
     wxDataViewColumn *searchResultColumn;
     wxArrayString allSearchItems;
+    Trie trie;
 
-    void OnItemActivatedAtSearchResult(wxDataViewEvent &event);
-    void OnSearch(wxCommandEvent &event);
-    void OnSearchButton();
-    void SearchWithTrie();
     void OnSize(wxSizeEvent &event);
     void OnMove(wxMoveEvent &event);
     void UpdateSearchResultPosition();
-    //--------------------------------------------------------------
 
-    //----------contextMenu Related Properties-----------------------
+    // Context menu state
     bool isCut = false;
     wxString cutBuffer;
     wxString copyBuffer;
-    //--------------------------------------------------------------
 
+    // Navigation history
     std::stack<wxString> backwardStack;
     std::stack<wxString> forwardStack;
+
+    // Recently accessed files and folders
     SplayTree<wxString> recentlyAccessedFiles;
-    // std::unordered_map<wxString, std::chrono::time_point<std::chrono::system_clock>> recentlyAccessedFiles;
     std::vector<wxString> recentlyAccessedFolders;
 
-    // ------------Getting Directory Properties Async -----------------------------------
+    // Properties panel components
     wxStaticText *nameLabel;
     wxStaticText *sizeLabel;
     wxStaticText *lastModifiedLabel;
