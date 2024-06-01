@@ -461,7 +461,7 @@ void MyFrame::PopulateFolderIcons(const wxString &path, wxSizer *sizer)
     }
 
     currentPath = path;
-    // prefix replace if prefix == GetTrashDirectory()
+    // prefix replace at TopBar
     wxString cPath = path;
     cPath.Replace(GetTrashDirectory(), wxString("Trash"), true);
     cPath.Replace(wxGetHomeDir(), wxString("Home"), true);
@@ -1058,10 +1058,11 @@ void MyFrame::OnShowContextMenu(wxContextMenuEvent &event)
              { OnCopy(activeFileIcon); 
              std::cout << "copy check..." << std::endl; }, copyItem->GetId());
         wxMenuItem *pasteItem = menu.Append(wxID_ANY, "Paste");
-        Bind(wxEVT_MENU, [this, activeFileIcon](wxCommandEvent &)
-             { OnPaste(currentPath); 
-             std::cout << "paste check...2" << std::endl; }, pasteItem->GetId());
-        pasteItem->Enable(isCut || !copyBuffer.IsEmpty());
+        // Bind(wxEVT_MENU, [this, activeFileIcon](wxCommandEvent &)
+        //      { OnPaste(currentPath);
+        //      std::cout << "paste check...2" << std::endl; }, pasteItem->GetId());
+        // pasteItem->Enable(isCut || !copyBuffer.IsEmpty());
+        pasteItem->Enable(false);
         menu.AppendSeparator();
         wxMenuItem *deleteItem = menu.Append(wxID_ANY, "Delete");
         Bind(wxEVT_MENU, [this, activeFileIcon](wxCommandEvent &event)
@@ -1146,12 +1147,74 @@ void MyFrame::OnCopy(FileIcon *fileIcon)
     isCut = false;
 }
 
+// Function to copy a file
+bool MyFrame::CopyFile(const wxString &sourceFile, const wxString &destFile)
+{
+    return wxCopyFile(sourceFile, destFile, true);
+}
+
+// Function to copy a directory
+bool MyFrame::CopyDirectory(const wxString &sourceDir, const wxString &destDir)
+{
+    if (!wxDirExists(sourceDir))
+    {
+        std::cerr << "Source directory does not exist: " << sourceDir << std::endl;
+        return false;
+    }
+
+    // Create the destination directory if it does not exist
+    if (!wxDirExists(destDir))
+    {
+        if (!wxMkdir(destDir))
+        {
+            std::cerr << "Failed to create destination directory: " << destDir << std::endl;
+            return false;
+        }
+    }
+
+    wxDir dir(sourceDir);
+    if (!dir.IsOpened())
+    {
+        std::cerr << "Failed to open source directory: " << sourceDir << std::endl;
+        return false;
+    }
+
+    wxString filename;
+    bool cont = dir.GetFirst(&filename);
+    while (cont)
+    {
+        wxString sourcePath = sourceDir + wxFileName::GetPathSeparator() + filename;
+        wxString destPath = destDir + wxFileName::GetPathSeparator() + filename;
+
+        if (wxDirExists(sourcePath))
+        {
+            // Recursively copy subdirectory
+            if (!CopyDirectory(sourcePath, destPath))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            // Copy file
+            if (!CopyFile(sourcePath, destPath))
+            {
+                std::cerr << "Failed to copy file: " << sourcePath << " to " << destPath << std::endl;
+                return false;
+            }
+        }
+        cont = dir.GetNext(&filename);
+    }
+    return true;
+}
+
 void MyFrame::OnPaste(wxString folderPath)
 {
     if (isCut)
     {
         if (wxDirExists(cutBuffer))
         {
+            std::cout << "Dir paste..." << std::endl;
             wxRenameFile(cutBuffer, folderPath + wxFileName::GetPathSeparator() + wxFileName(cutBuffer).GetFullName());
             std::cout << "Cut and pasted folder " << cutBuffer << " to " << folderPath << std::endl;
             cutBuffer.Clear();
@@ -1159,6 +1222,7 @@ void MyFrame::OnPaste(wxString folderPath)
         }
         else if (wxFileExists(cutBuffer))
         {
+            std::cout << "File paste..." << std::endl;
             wxRenameFile(cutBuffer, folderPath + wxFileName::GetPathSeparator() + wxFileName(cutBuffer).GetFullName());
             std::cout << "Cut and pasted file " << cutBuffer << " to " << folderPath << std::endl;
             cutBuffer.Clear();
@@ -1174,12 +1238,20 @@ void MyFrame::OnPaste(wxString folderPath)
     {
         if (wxDirExists(copyBuffer))
         {
-            wxCopyFile(copyBuffer, folderPath + wxFileName::GetPathSeparator() + wxFileName(copyBuffer).GetFullName());
-            std::cout << "Copied folder " << copyBuffer << " to " << folderPath << std::endl;
+            std::cout << "Dir paste..." << std::endl;
+            if (CopyDirectory(copyBuffer, folderPath + wxFileName::GetPathSeparator() + wxFileName(copyBuffer).GetFullName()))
+            {
+                std::cout << "Copied folder " << copyBuffer << " to " << folderPath << std::endl;
+            }
+            else
+            {
+                std::cerr << "Failed to copy folder " << copyBuffer << " to " << folderPath << std::endl;
+            }
             copyBuffer.Clear();
         }
         else if (wxFileExists(copyBuffer))
         {
+            std::cout << "File paste..." << std::endl;
             wxCopyFile(copyBuffer, folderPath + wxFileName::GetPathSeparator() + wxFileName(copyBuffer).GetFullName());
             std::cout << "Copied file " << copyBuffer << " to " << folderPath << std::endl;
             copyBuffer.Clear();

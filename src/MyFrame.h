@@ -114,6 +114,8 @@ public:
     Props GetFileProperties(const wxString &fileName);
     wxBitmap ResizeImageToWidth(const wxBitmap &originalBitmap, int newWidth);
     void setPropertiesIcon(const wxString &iconPath);
+    bool CopyFile(const wxString &sourceFile, const wxString &destFile);
+    bool CopyDirectory(const wxString &sourceDir, const wxString &destDir);
 
     // ------------Getting Directory Properties Async -----------------------------------
     uintmax_t GetDirectorySize(const std::filesystem::path &dirPath);
