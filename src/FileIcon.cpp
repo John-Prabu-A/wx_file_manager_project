@@ -20,40 +20,29 @@ FileIcon::FileIcon(wxWindow *parent, wxString fileName, wxString filePath, const
 
     // add space in the file name if more than 12 characters without space
     wxString newFileName = "";
-    // remove extension from m_fileName
-    wxString noExtFileName = m_fileName.substr(0, m_fileName.find_last_of("."));
-
-    if (noExtFileName.length() > 11)
+    if (m_fileName.length() > 11)
     {
-        bool isAddSpace = true;
-        for (int i = 0; i < noExtFileName.length(); i++)
+        int j = 0;
+        int count = 0;
+        for (int i = 0; i < m_fileName.length(); i++)
         {
-            if (i > 0 && i < noExtFileName.length() - 1)
+            if (j > 0 && j % 11 == 0)
             {
-                if (noExtFileName[i] == ' ' || noExtFileName[i - 1] == ' ' || noExtFileName[i + 1] == ' ')
+                count++;
+                if (count == 2)
                 {
-                    isAddSpace = false;
+                    newFileName += "...";
+                    break;
                 }
+                newFileName += " ";
             }
-            if (i % 11 == 0 && i != 0)
-            {
-                if (isAddSpace)
-                {
-                    newFileName += " ";
-                    isAddSpace = true;
-                }
-            }
-            newFileName += noExtFileName[i];
+            newFileName += m_fileName[i];
+            j++;
         }
     }
     else
     {
-        newFileName = noExtFileName;
-    }
-    if (newFileName.length() > 23)
-    {
-        newFileName = newFileName.substr(0, 20);
-        newFileName += "...";
+        newFileName = m_fileName;
     }
 
     m_text = new wxStaticText(this, wxID_ANY, newFileName, wxDefaultPosition, wxSize(FromDIP(100), FromDIP(40)), wxALIGN_CENTER_HORIZONTAL | wxST_NO_AUTORESIZE);

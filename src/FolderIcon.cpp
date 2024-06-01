@@ -19,39 +19,31 @@ FolderIcon::FolderIcon(wxWindow *parent, std::string folderName, wxString folder
     wxString newFolderName = "";
     if (m_folderName.length() > 11)
     {
-        bool isAddSpace = true;
+        int j = 0;
+        int count = 0;
         for (int i = 0; i < m_folderName.length(); i++)
         {
-            if (i > 0 && i < m_folderName.length() - 1)
+            if (j > 0 && j % 11 == 0)
             {
-                if (m_folderName[i] == ' ' || m_folderName[i - 1] == ' ' || m_folderName[i + 1] == ' ')
+                count++;
+                if (count == 2)
                 {
-                    isAddSpace = false;
+                    newFolderName += "...";
+                    break;
                 }
-            }
-            if (i % 11 == 0 && i != 0)
-            {
-                if (isAddSpace)
-                {
-                    newFolderName += " ";
-                    isAddSpace = true;
-                }
+                newFolderName += " ";
             }
             newFolderName += m_folderName[i];
+            j++;
         }
     }
     else
     {
         newFolderName = m_folderName;
     }
-    if (newFolderName.length() > 23)
-    {
-        newFolderName = newFolderName.substr(0, 20);
-        newFolderName += "...";
-    }
 
     // Display folder name
-    m_text = new wxStaticText(this, wxID_ANY, newFolderName, wxDefaultPosition, wxSize(FromDIP(100), FromDIP(50)), wxALIGN_CENTER_HORIZONTAL | wxST_NO_AUTORESIZE);
+    m_text = new wxStaticText(this, wxID_ANY, newFolderName, wxDefaultPosition, wxSize(FromDIP(100), FromDIP(40)), wxALIGN_CENTER_HORIZONTAL | wxST_NO_AUTORESIZE);
     m_text->Wrap(FromDIP(100));
     // Sizers to layout the components
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);

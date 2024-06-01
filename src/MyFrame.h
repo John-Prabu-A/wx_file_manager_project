@@ -63,6 +63,7 @@
 #include "folderTreeStructure.h"
 #include "StyledButton.h"
 #include "Trie.h"
+#include "SplayTree.h"
 
 class BufferedBitmap;
 class FolderIcon;
@@ -90,13 +91,9 @@ public:
     void CreateRightPanel();
     wxString GetTrashDirectory();
     void PopulateFolderIcons(const wxString &path, wxSizer *sizer);
-    void UpdateFolders(wxCommandEvent &event);
     void OnFolderPathChange(wxString folderPath);
     void MakeTrie(wxString path);
-    void displayDirectoryProperties(const wxString &dirName);
     bool setFilePermissions(const wxString &filename, int permissions);
-    void displayRecentlyAccessedFiles();
-    void displayRecentlyAccessedFolders();
     void navigateToHome();
     void gotoParentDirectory();
     void navigateForward();
@@ -194,6 +191,7 @@ private:
     //----------SearchBar related Methods & Properties--------------
     wxSearchCtrl *searchBar;
     StyledButton *searchButton;
+    wxScrolledWindow *scrolledWindow;
     wxDataViewListCtrl *searchResultList;
     wxDataViewColumn *searchResultColumn;
     wxArrayString allSearchItems;
@@ -215,7 +213,8 @@ private:
 
     std::stack<wxString> backwardStack;
     std::stack<wxString> forwardStack;
-    std::unordered_map<wxString, std::chrono::time_point<std::chrono::system_clock>> recentlyAccessedFiles;
+    SplayTree<wxString> recentlyAccessedFiles;
+    // std::unordered_map<wxString, std::chrono::time_point<std::chrono::system_clock>> recentlyAccessedFiles;
     std::vector<wxString> recentlyAccessedFolders;
 
     // ------------Getting Directory Properties Async -----------------------------------
@@ -230,6 +229,7 @@ private:
     wxStaticText *permissionsValue;
 
     int margin = FromDIP(10);
+    int RecentLimit = 25;
 };
 
 #endif // MYFRAME_H

@@ -58,13 +58,14 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
                                       {
 
         if(currentPath == GetTrashDirectory()) return;
+        if(nameText->GetValue() == "Recent") return;
         gotoParentDirectory();
         OnFolderPathChange(MyFrame::currentPath); });
 
     backButton->SetClickHandler([&]()
                                 {
         navigateBack();
-        OnFolderPathChange(MyFrame::currentPath); 
+        OnFolderPathChange(MyFrame::currentPath);
         if(currentPath == GetTrashDirectory()) nameText->SetValue(wxString("Trash")); });
 
     forwardButton->SetClickHandler([&]()
@@ -91,6 +92,11 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
 
     searchBar = new wxSearchCtrl(panel_top, wxID_ANY, "", wxDefaultPosition, wxSize(-1, iconHeight));
     searchBar->Bind(wxEVT_TEXT, &MyFrame::OnSearch, this);
+    searchBar->Bind(wxEVT_TEXT_ENTER, [&](wxCommandEvent &event)
+                    {
+        std::cout << "Enter at search" << std::endl;
+        OnSearchButton();
+        event.Skip(); });
     searchButton = new StyledButton(panel_top, wxID_ANY, wxT(" Search "), wxDefaultPosition, wxSize(FromDIP(100), iconHeight));
     searchButton->SetClickHandler([&]()
                                   { 
@@ -99,8 +105,9 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
     searchBar->ShowSearchButton(true);
     searchBar->SetDescriptiveText("Search");
     searchBar->SetMinSize(wxSize(100, iconHeight));
-
-    searchResultList = new wxDataViewListCtrl(this, wxID_ANY);
+    scrolledWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL | wxVSCROLL);
+    scrolledWindow->SetScrollRate(5, 5);
+    searchResultList = new wxDataViewListCtrl(scrolledWindow, wxID_ANY);
     searchResultColumn = searchResultList->AppendTextColumn("Results");
 
     nameFormSizer->Add(searchBar, 1, wxLEFT | wxTOP, margin);
@@ -166,36 +173,12 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
 
     MyFrame::MakePropertiesPanelTextEmpty();
 
-    StyledButton *zoomInButton = new StyledButton(panel_right, wxID_ANY, wxT("\u002B"));
-    StyledButton *zoomOutButton = new StyledButton(panel_right, wxID_ANY, wxT("\u2212"));
-
-    zoomInButton->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event)
-                       {
-        if (bitmap)
-        {
-            // wxImage image = bitmap->GetBitmap().ConvertToImage();
-            // image.Rescale(image.GetWidth() * 1.1, image.GetHeight() * 1.1);
-            // SetScaledImage(image, true);
-            bitmap->ZoomIn();
-        } });
-
-    zoomOutButton->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event)
-                        {
-        if (bitmap)
-        {
-            // wxImage image = bitmap->GetBitmap().ConvertToImage();
-            // image.Rescale(image.GetWidth() * 0.9, image.GetHeight() * 0.9);
-            // SetScaledImage(image, true);
-            bitmap->ZoomOut();
-        } });
-
-    propertiesSizer->Add(zoomInButton, 0, wxEXPAND | wxALL, margin);
-    propertiesSizer->Add(zoomOutButton, 0, wxEXPAND | wxALL, margin);
-
     quickAccessPanel = new FolderTreeStructurePanel(this, panel_left);
-    StyledButton *recentAccessButton = new StyledButton(panel_left, wxID_ANY, "Recently Accessed", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    StyledButton *recentAccessButton = new StyledButton(panel_left, wxID_ANY, "Recent", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    recentAccessButton->SetClickHandler([&]()
+                                        { OnFolderPathChange("Recent"); });
 
-    StyledButton *starredFilesAccessButton = new StyledButton(panel_left, wxID_ANY, "Starred Files", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
+    // StyledButton *starredFilesAccessButton = new StyledButton(panel_left, wxID_ANY, "Starred Files", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     StyledButton *HomeButton = new StyledButton(panel_left, wxID_ANY, "Home", wxDefaultPosition, wxSize(-1, iconHeight), wxNullColour, wxNullColour, wxNullColour, 0, 1);
     HomeButton->SetClickHandler([&]()
                                 { OnFolderPathChange(wxGetHomeDir()); });
@@ -225,7 +208,7 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
         nameText->SetValue(wxString("Trash")); });
     quickAccessSizer = new wxBoxSizer(wxVERTICAL);
     quickAccessSizer->Add(recentAccessButton, 0, wxEXPAND | wxRIGHT, margin - 1);
-    quickAccessSizer->Add(starredFilesAccessButton, 0, wxEXPAND | wxRIGHT, margin - 1);
+    // quickAccessSizer->Add(starredFilesAccessButton, 0, wxEXPAND | wxRIGHT, margin - 1);
     quickAccessSizer->Add(HomeButton, 0, wxEXPAND | wxRIGHT, margin - 1);
     quickAccessSizer->Add(DesktopButton, 0, wxEXPAND | wxRIGHT, margin - 1);
     quickAccessSizer->Add(DocumentsButton, 0, wxEXPAND | wxRIGHT, margin - 1);
@@ -298,11 +281,12 @@ void MyFrame::MakeTrie(wxString path)
 
     wxString filename;
     bool cont = dir.GetFirst(&filename);
+    std::cout << "Start Insertion in Trie..." << filename << std::endl;
     while (cont)
     {
-        wxString fullPath = path + wxFileName::GetPathSeparator() + filename;
+        wxString fullPath = ((wxDirExists(path + wxFileName::GetPathSeparator() + filename) ? wxString("[DIR] ") : wxString("[FILE] "))) + path + wxFileName::GetPathSeparator() + filename;
         trie.insert(std::string(fullPath.mb_str()));
-
+        std::cout << "Inserting: " << fullPath << std::endl;
         // for recursive insert
 
         //  if (wxDirExists(fullPath))
@@ -312,19 +296,26 @@ void MyFrame::MakeTrie(wxString path)
 
         cont = dir.GetNext(&filename);
     }
+    std::cout << "End Insertion in Trie..." << std::endl;
 }
 
 void MyFrame::SearchWithTrie()
 {
-    wxString prefix = currentPath + wxFileName::GetPathSeparator() + searchBar->GetValue();
-    std::vector<std::string> results = trie.searchWithPrefix(std::string(prefix.mb_str()));
+    wxString prefix = searchBar->GetValue();
     if (prefix != "")
     {
+        std::cout << "Checkpoint 1" << std::endl;
         searchResultList->DeleteAllItems();
+        std::vector<std::string> resultFiles = trie.searchWithPrefix((wxString("[FILE] ") + currentPath + wxFileName::GetPathSeparator() + searchBar->GetValue()).ToStdString());
+        std::vector<std::string> resultFolders = trie.searchWithPrefix((wxString("[DIR] ") + currentPath + wxFileName::GetPathSeparator() + searchBar->GetValue()).ToStdString());
+        std::vector<std::string> results(resultFiles);
+        results.insert(results.end(), resultFolders.begin(), resultFolders.end());
         for (const auto &result : results)
         {
             allSearchItems.Add(result);
+            std::cout << "Result [" << result << "]" << std::endl;
         }
+        std::cout << "Checkpoint 4" << std::endl;
         for (const auto &item : allSearchItems)
         {
             std::cout << "Checkpoint 6" << std::endl;
@@ -347,7 +338,9 @@ void MyFrame::SearchWithTrie()
     {
         searchResultList->Hide();
     }
+    std::cout << "Checkpoint 13" << std::endl;
     UpdateSearchResultPosition();
+    std::cout << "Checkpoint 14" << std::endl;
 }
 
 void MyFrame::OnSearch(wxCommandEvent &event)
@@ -448,7 +441,7 @@ void MyFrame::UpdateSearchResultPosition()
         wxSize searchBarSize = searchBar->GetSize();
         wxPoint panelPos = searchBar->GetParent()->ClientToScreen(wxPoint(0, 0));
         wxPoint searchResultListPos = wxPoint(searchBarPos.x, searchBarPos.y + searchBarSize.GetHeight());
-        searchResultList->SetPosition(searchResultListPos);
+        scrolledWindow->SetPosition(searchResultListPos);
 
         // Get the number of items in the result list
         int itemCount = searchResultList->GetItemCount();
@@ -462,7 +455,8 @@ void MyFrame::UpdateSearchResultPosition()
         }
         int itemHeight = FromDIP(28);
         int searchResultListHeight = itemCount * itemHeight;
-        searchResultList->SetSize(searchBarSize.GetWidth(), searchResultListHeight + FromDIP(28));
+        searchResultList->SetSize(searchBarSize.GetWidth(), ((searchResultListHeight + FromDIP(28) < 500) ? searchResultListHeight + FromDIP(28) : FromDIP(500)));
+        scrolledWindow->SetSize(searchBarSize.GetWidth(), searchResultListHeight + FromDIP(28));
     }
 }
 
@@ -603,9 +597,35 @@ void MyFrame::PopulateFolderIcons(const wxString &path, wxSizer *sizer)
 
 void MyFrame::OnFolderPathChange(wxString folderPath)
 {
-    std::async(std::launch::async, &MyFrame::MakeTrie, this, folderPath);
-    NavigateTo(folderPath);
-    PopulateFolderIcons(folderPath, folderStructureSizer);
+    if (folderPath != "Recent")
+    {
+        auto future = std::async(std::launch::async, &MyFrame::MakeTrie, this, folderPath);
+        future.wait();
+        NavigateTo(folderPath);
+        PopulateFolderIcons(folderPath, folderStructureSizer);
+    }
+    else
+    {
+        nameText->SetValue("Recent");
+        folderStructureSizer->Clear(true);
+        std::vector<wxString> recentlyAccessed = recentlyAccessedFiles.getRecentlyAccessed();
+        NavigateTo(folderPath);
+        RecentLimit = 0;
+        for (const auto &file : recentlyAccessed)
+        {
+            wxString fullPath = wxFileName::DirName(path).GetFullPath() + file;
+            std::string fileNameStr = fullPath.substr(fullPath.find_last_of("/") + 1).ToStdString();
+            FileIcon *fileIcon = new FileIcon(panel_mid, fileNameStr, fullPath, wxSize(70, 70));
+            folderStructureSizer->Add(fileIcon, 0, wxALL, margin);
+            folderStructureSizer->Layout();
+            fileIcon->Bind(wxEVT_COMMAND_MENU_SELECTED, [=](wxCommandEvent &event)
+                           {
+                           wxString filePath = fileIcon->GetFilePath();
+                           OpenFile(filePath); });
+            if (++RecentLimit == 25)
+                break;
+        }
+    }
 }
 
 wxString MyFrame::formatTime(std::filesystem::file_time_type ftime)
@@ -689,7 +709,7 @@ Props MyFrame::GetFileProperties(const wxString &fileName)
         newProps.Permissions = getPermissions(s.permissions());
 
         // Store recently accessed file
-        recentlyAccessedFiles[wxString(filePath.string())] = std::chrono::system_clock::now();
+        recentlyAccessedFiles.insert(wxString(filePath.string()));
     }
     else
     {
@@ -722,7 +742,7 @@ void MyFrame::OpenFile(const wxString &filePath)
         {
             wxLaunchDefaultApplication(filePath); // Open with default application
         }
-
+        recentlyAccessedFiles.insert(filePath);
         delete fileType;
     }
     else
@@ -989,40 +1009,6 @@ void MyFrame::navigateToHome()
     else
     {
         std::cout << "Already at the root directory." << std::endl;
-    }
-}
-
-void MyFrame::displayRecentlyAccessedFolders()
-{
-    std::cout << "Recently accessed folders:" << std::endl;
-    for (const auto &folder : recentlyAccessedFolders)
-    {
-        wxString folderPath = currentPath + wxFileName::GetPathSeparator() + folder;
-        if (wxDirExists(folderPath))
-        {
-            std::filesystem::path fpath(folderPath.ToStdString());
-            auto ftime = std::filesystem::last_write_time(fpath);
-            auto sctp = std::chrono::time_point_cast<std::filesystem::file_time_type::clock::duration>(
-                recentlyAccessedFiles[folderPath]);
-            std::filesystem::last_write_time(fpath,
-                                             std::filesystem::file_time_type{sctp.time_since_epoch()});
-            std::cout << folderPath << " - " << formatTime(ftime) << std::endl;
-        }
-    }
-}
-
-void MyFrame::displayRecentlyAccessedFiles()
-{
-    std::cout << "Recently accessed files:" << std::endl;
-    for (const auto &pair : recentlyAccessedFiles)
-    {
-        wxString filePath = pair.first;
-        auto ftime = std::filesystem::last_write_time(filePath.ToStdString());
-        auto sctp = std::chrono::time_point_cast<std::filesystem::file_time_type::clock::duration>(
-            pair.second);
-        std::filesystem::last_write_time(filePath.ToStdString(),
-                                         std::filesystem::file_time_type{sctp.time_since_epoch()});
-        std::cout << filePath << " - " << formatTime(ftime) << std::endl;
     }
 }
 
@@ -1516,7 +1502,7 @@ Props MyFrame::GetDirectoryProperties(const wxString &dirName)
         newProps.Permissions = permissions;
         std::cout << "checkpoint 11" << std::endl;
 
-        recentlyAccessedFiles[wxString(dirPath.string())] = std::chrono::system_clock::now();
+        recentlyAccessedFiles.insert(wxString(dirPath.string()));
     }
     else
     {
@@ -1577,32 +1563,6 @@ void MyFrame::CreateRightPanel()
     rowSizer->Add(permissionsLabel, 0, wxRIGHT, margin);
     rowSizer->Add(permissionsValue, 1, wxEXPAND | wxLEFT, margin);
     propertiesSizer->Add(rowSizer, 0, wxEXPAND | wxALL, margin);
-
-    StyledButton *zoomInButton = new StyledButton(panel_right, wxID_ANY, wxT("\u002B"));
-    StyledButton *zoomOutButton = new StyledButton(panel_right, wxID_ANY, wxT("\u2212"));
-
-    propertiesSizer->Add(zoomInButton, 0, wxEXPAND | wxALL, margin);
-    propertiesSizer->Add(zoomOutButton, 0, wxEXPAND | wxALL, margin);
-
-    zoomInButton->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event)
-                       {
-        if (bitmapControl)
-        {
-            wxImage image = bitmapControl->GetBitmap().ConvertToImage();
-            image.Rescale(image.GetWidth() * 1.1, image.GetHeight() * 1.1, wxIMAGE_QUALITY_HIGH);
-            bitmapControl->SetBitmap(wxBitmap(image));
-            propertiesSizer->Layout();
-        } });
-
-    zoomOutButton->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event)
-                        {
-        if (bitmapControl)
-        {
-            wxImage image = bitmapControl->GetBitmap().ConvertToImage();
-            image.Rescale(image.GetWidth() * 0.9, image.GetHeight() * 0.9, wxIMAGE_QUALITY_HIGH);
-            bitmapControl->SetBitmap(wxBitmap(image));
-            propertiesSizer->Layout();
-        } });
 
     panel_right->SetSizer(propertiesSizer);
     sizer_bottom->Add(panel_right, 0, wxEXPAND);
