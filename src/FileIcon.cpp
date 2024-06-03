@@ -221,36 +221,36 @@ void FileIcon::OnTextDoubleClick(wxMouseEvent &event)
 void FileIcon::InitializeFileIconMap()
 {
     fileIconMap["txt"] = "src/resource/text_icon.png";
-    fileIconMap["doc"] = "src/resource/libreoffice-writer.png";
-    fileIconMap["docx"] = "src/resource/libreoffice-writer.png";
-    fileIconMap["pdf"] = "src/resource/org.gtkhash.gtkhash.png";
-    fileIconMap["jpg"] = "src/resource/rygel.png";
-    fileIconMap["png"] = "src/resource/rygel.png";
-    fileIconMap["xlsx"] = "src/resource/libreoffice-calc.png";
-    fileIconMap["pptx"] = "src/resource/libreoffice-impress.png";
-    fileIconMap["xls"] = "src/resource/libreoffice-calc.png";
-    fileIconMap["ppt"] = "src/resource/libreoffice-impress.png";
-    fileIconMap["odt"] = "src/resource/libreoffice-writer.png";
-    fileIconMap["ods"] = "src/resource/libreoffice-calc.png";
-    fileIconMap["odp"] = "src/resource/libreoffice-impress.png";
+    fileIconMap["doc"] = "src/resource/doc_icon.png";
+    fileIconMap["docx"] = "src/resource/doc_icon.png";
+    fileIconMap["pdf"] = "src/resource/pdf_icon.png";
+    fileIconMap["jpg"] = "src/resource/img_icon.png";
+    fileIconMap["png"] = "src/resource/img_icon.png";
+    fileIconMap["xlsx"] = "src/resource/excel_icon.png";
+    fileIconMap["pptx"] = "src/resource/ppt_icon.png";
+    fileIconMap["xls"] = "src/resource/excel_icon.png";
+    fileIconMap["ppt"] = "src/resource/ppt_icon.png";
+    fileIconMap["odt"] = "src/resource/odt_icon.png";
+    fileIconMap["ods"] = "src/resource/excel_icon.png";
+    fileIconMap["odp"] = "src/resource/odp_icon.png";
     fileIconMap["csv"] = "src/resource/libreoffice-calc.png";
-    fileIconMap["gif"] = "src/resource/rygel.png";
-    fileIconMap["bmp"] = "src/resource/rygel.png";
-    fileIconMap["tif"] = "src/resource/rygel.png";
-    fileIconMap["tiff"] = "src/resource/rygel.png";
-    fileIconMap["zip"] = "src/resource/archive.png";
-    fileIconMap["rar"] = "src/resource/archive.png";
-    fileIconMap["tar"] = "src/resource/archive.png";
-    fileIconMap["gz"] = "src/resource/archive.png";
-    fileIconMap["bz2"] = "src/resource/archive.png";
-    fileIconMap["mp3"] = "src/resource/vlc.png";
-    fileIconMap["wav"] = "src/resource/vlc.png";
-    fileIconMap["avi"] = "src/resource/vlc.png";
-    fileIconMap["mp4"] = "src/resource/vlc.png";
-    fileIconMap["mkv"] = "src/resource/vlc.png";
-    fileIconMap["mov"] = "src/resource/vlc.png";
-    fileIconMap["flv"] = "src/resource/vlc.png";
-    fileIconMap["wmv"] = "src/resource/vlc.png";
+    fileIconMap["gif"] = "src/resource/img_icon.png";
+    fileIconMap["bmp"] = "src/resource/img_icon.png";
+    fileIconMap["tif"] = "src/resource/img_icon.png";
+    fileIconMap["tiff"] = "src/resource/img_icon.png";
+    fileIconMap["zip"] = "src/resource/archive_icon.png";
+    fileIconMap["rar"] = "src/resource/archive_icon.png";
+    fileIconMap["tar"] = "src/resource/archive_icon.png";
+    fileIconMap["gz"] = "src/resource/archive_icon.png";
+    fileIconMap["bz2"] = "src/resource/archive_icon.png";
+    fileIconMap["mp3"] = "src/resource/video_icon.png";
+    fileIconMap["wav"] = "src/resource/video_icon.png";
+    fileIconMap["avi"] = "src/resource/video_icon.png";
+    fileIconMap["mp4"] = "src/resource/video_icon.png";
+    fileIconMap["mkv"] = "src/resource/video_icon.png";
+    fileIconMap["mov"] = "src/resource/video_icon.png";
+    fileIconMap["flv"] = "src/resource/video_icon.png";
+    fileIconMap["wmv"] = "src/resource/video_icon.png";
 }
 
 wxString FileIcon::GetFileExtension(wxString filePath)
