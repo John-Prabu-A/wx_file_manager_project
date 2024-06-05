@@ -40,6 +40,7 @@
 #include <functional>
 #include <future>
 #include <wx/msgdlg.h>
+#include <wx/event.h>
 
 #include <wx/mimetype.h>
 #include <unordered_map>
@@ -91,6 +92,7 @@ public:
     void navigateForward();
     void navigateBack();
     void NavigateTo(const wxString &path);
+    // void OnMouseEvents(wxMouseEvent &event);
 
     // File and directory operations
     void renameDirectory(const wxString &oldName, const wxString &newName);
@@ -157,6 +159,17 @@ public:
     void OnProperties(FileIcon *fileIcon);
     void OnNewFolder(wxCommandEvent &event);
     void OnNewFile(wxCommandEvent &event);
+
+    // Mouse Events
+    void OnLeftDown(wxMouseEvent &event);
+    void OnLeftUp(wxMouseEvent &event);
+    void OnRightDown(wxMouseEvent &event);
+    void OnRightUp(wxMouseEvent &event);
+    void OnMotion(wxMouseEvent &event);
+    void OnAux1Down(wxMouseEvent &event);
+    void OnAux1Up(wxMouseEvent &event);
+    void OnAux2Down(wxMouseEvent &event);
+    void OnAux2Up(wxMouseEvent &event);
 
     friend class FolderTreeStructurePanel;
 
