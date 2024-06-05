@@ -559,8 +559,10 @@ void MyFrame::OnItemActivatedAtSearchResult(wxDataViewEvent &event)
 
     if (prefix == filePrefix)
     {
+        wxBeginBusyCursor();
         wxString fileName = itemValue.Mid(7);
         OpenFile(fileName);
+        wxEndBusyCursor();
     }
     else if (prefix == dirPrefix)
     {
@@ -674,8 +676,10 @@ void MyFrame::PopulateFolderIcons(const wxString &path, wxSizer *sizer)
         sizer->Layout();
         fileIcon->Bind(wxEVT_COMMAND_MENU_SELECTED, [=](wxCommandEvent &event)
                        {
-                           wxString filePath = fileIcon->GetFilePath();
-                           OpenFile(filePath); });
+            wxBeginBusyCursor();
+            wxString filePath = fileIcon->GetFilePath();
+            OpenFile(filePath); 
+            wxEndBusyCursor(); });
     }
 }
 
@@ -704,8 +708,10 @@ void MyFrame::OnFolderPathChange(wxString folderPath)
             folderStructureSizer->Layout();
             fileIcon->Bind(wxEVT_COMMAND_MENU_SELECTED, [=](wxCommandEvent &event)
                            {
-                           wxString filePath = fileIcon->GetFilePath();
-                           OpenFile(filePath); });
+                wxBeginBusyCursor();
+                wxString filePath = fileIcon->GetFilePath();
+                OpenFile(filePath); 
+                wxEndBusyCursor(); });
             if (++RecentLimit == 25)
                 break;
         }
@@ -1258,8 +1264,11 @@ void MyFrame::OnOpen(FolderIcon *folderIcon)
 
 void MyFrame::OnOpen(FileIcon *fileIcon)
 {
+
+    wxBeginBusyCursor();
     wxString filePath = fileIcon->GetFilePath();
     OpenFile(filePath);
+    wxEndBusyCursor();
 }
 
 void MyFrame::OnCut(FolderIcon *folderIcon)
