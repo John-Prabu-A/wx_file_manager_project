@@ -59,6 +59,8 @@ FolderIcon::FolderIcon(wxWindow *parent, std::string folderName, wxString folder
 
     // Binding events
     parent->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnLeftClick, this);
+    this->Bind(wxEVT_LEFT_DCLICK, &FolderIcon::OnDoubleClick, this);
+    this->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnIconClick, this);
     m_iconBitmap->Bind(wxEVT_LEFT_DCLICK, &FolderIcon::OnDoubleClick, this);
     m_iconBitmap->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnIconClick, this);
     m_text->Bind(wxEVT_LEFT_DOWN, &FolderIcon::OnTextClick, this);

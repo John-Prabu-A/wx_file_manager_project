@@ -244,7 +244,78 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size, 
         MakePropertiesPanelTextEmpty();
         event.Skip(); });
 
+    // Mid Panel Mouse Event
+    panel_mid->Bind(wxEVT_LEFT_DOWN, &MyFrame::OnLeftDown, this);
+    panel_mid->Bind(wxEVT_LEFT_UP, &MyFrame::OnLeftUp, this);
+    panel_mid->Bind(wxEVT_RIGHT_DOWN, &MyFrame::OnRightDown, this);
+    panel_mid->Bind(wxEVT_RIGHT_UP, &MyFrame::OnRightUp, this);
+    panel_mid->Bind(wxEVT_MOTION, &MyFrame::OnMotion, this);
+    panel_mid->Bind(wxEVT_AUX1_DOWN, &MyFrame::OnAux1Down, this);
+    panel_mid->Bind(wxEVT_AUX1_UP, &MyFrame::OnAux1Up, this);
+    panel_mid->Bind(wxEVT_AUX2_DOWN, &MyFrame::OnAux2Down, this);
+    panel_mid->Bind(wxEVT_AUX2_UP, &MyFrame::OnAux2Up, this);
+
     wxInitAllImageHandlers();
+}
+
+void MyFrame::OnLeftDown(wxMouseEvent &event)
+{
+    std::cout << "Left button down at (" << event.GetX() << "," << event.GetY() << ")" << std::endl;
+    event.Skip();
+}
+
+void MyFrame::OnLeftUp(wxMouseEvent &event)
+{
+    std::cout << "Left button up at (" << event.GetX() << "," << event.GetY() << ")" << std::endl;
+    event.Skip();
+}
+
+void MyFrame::OnRightDown(wxMouseEvent &event)
+{
+    std::cout << "Right button down at (" << event.GetX() << "," << event.GetY() << ")" << std::endl;
+
+    event.Skip();
+}
+
+void MyFrame::OnRightUp(wxMouseEvent &event)
+{
+    std::cout << "Right button up at (" << event.GetX() << "," << event.GetY() << ")" << std::endl;
+    event.Skip();
+}
+
+void MyFrame::OnMotion(wxMouseEvent &event)
+{
+    if (event.Dragging())
+    {
+        std::cout << "Dragging at (" << event.GetX() << "," << event.GetY() << ")" << std::endl;
+    }
+    event.Skip();
+}
+
+void MyFrame::OnAux1Down(wxMouseEvent &event)
+{
+    std::cout << "Auxiliary button 1 down at (" << event.GetX() << "," << event.GetY() << ")" << std::endl;
+
+    event.Skip();
+}
+
+void MyFrame::OnAux1Up(wxMouseEvent &event)
+{
+    std::cout << "Auxiliary button 1 up at (" << event.GetX() << "," << event.GetY() << ")" << std::endl;
+
+    event.Skip();
+}
+
+void MyFrame::OnAux2Down(wxMouseEvent &event)
+{
+    std::cout << "Auxiliary button 2 down at (" << event.GetX() << "," << event.GetY() << ")" << std::endl;
+    event.Skip();
+}
+
+void MyFrame::OnAux2Up(wxMouseEvent &event)
+{
+    std::cout << "Auxiliary button 2 up at (" << event.GetX() << "," << event.GetY() << ")" << std::endl;
+    event.Skip();
 }
 
 void MyFrame::setPropertiesIcon(const wxString &iconPath)
@@ -263,6 +334,19 @@ void MyFrame::setPropertiesIcon(const wxString &iconPath)
     panel_right->Layout();
     panel_right->Refresh();
 }
+
+// void MyFrame::OnMouseEvents(wxMouseEvent &event)
+// {
+//     if (event.GetButton() == wxMOUSE_BTN_LEFT)
+//     {
+//         wxLogMessage("Left mouse button clicked");
+//     }
+//     if (event.GetButton() == wxMOUSE_BTN_AUX2)
+//     {
+//         wxLogMessage("Forward mouse button clicked");
+//     }
+//     event.Skip();
+// }
 
 void MyFrame::MakeTrie(wxString path)
 {
@@ -751,50 +835,51 @@ void MyFrame::OpenFile(const wxString &filePath)
     }
 }
 
-// bool MyFrame::OpenFile(const wxString &fName)
+// void MyFrame::OpenFile(const wxString &filePath)
 // {
-//     std::string fileName = fName.ToStdString();
-//     std::filesystem::path filePath = std::filesystem::path(currentPath.ToStdString()) / fileName;
-//     if (std::filesystem::exists(filePath) && !std::filesystem::is_directory(filePath))
-//     {
-//         if (std::filesystem::is_regular_file(filePath))
-//         {
-
-//             recentlyAccessedFiles[wxString(filePath)] = std::chrono::system_clock::now();
-//             recentlyAccessedFolders.push_back(wxFileName(wxString(filePath)).GetPath());
-//             std::string command;
+//     recentlyAccessedFiles.insert(filePath);
+//     std::string command;
 // #ifdef _WIN32
-//             command = std::string("start '") + filePath.string() + "'";
+//     command = std::string("start '") + filePath.ToStdString() + "'";
 // #elif __linux__
-//             command = std::string("xdg-open '") + filePath.string() + "'";
+//     command = std::string("xdg-open '") + filePath.ToStdString() + "'";
 // #elif __APPLE__
-//             command = std::string("open '") + filePath.string() + "'";
+//     command = std::string("open '") + filePath.ToStdString() + "'";
 // #endif
-//             try
+//     try
+//     {
+//         std::cout << "Opening file..." << std::endl;
+//         system(command.c_str());
+//         std::cout << "file opened..." << std::endl;
+//     }
+//     catch (const std::exception &e)
+//     {
+//         std::cerr << e.what() << '\n';
+//         wxFileName fileName(filePath);
+//         if (!fileName.HasExt())
+//         {
+//             wxMessageBox("Not a regular File...", "Error", wxOK | wxICON_ERROR);
+//             return;
+//         }
+//         wxFileType *fileType = wxTheMimeTypesManager->GetFileTypeFromExtension(wxFileName(filePath).GetExt());
+//         if (fileType)
+//         {
+//             wxString mimeType;
+//             fileType->GetMimeType(&mimeType);
+//             if (mimeType == "application/x-executable")
 //             {
-//                 std::cout << "Opening file..." << std::endl;
-//                 system(command.c_str());
-//                 std::cout << "file opened..." << std::endl;
-//                 return true;
+//                 wxExecute(filePath); // Run the executable
 //             }
-//             catch (const std::exception &e)
+//             else
 //             {
-//                 std::cout << "error occured..." << std::endl;
-//                 std::cerr << e.what() << '\n';
-//                 return false;
+//                 wxLaunchDefaultApplication(filePath); // Open with default application
 //             }
+//             delete fileType;
 //         }
 //         else
 //         {
-//             std::cerr << "Error: Not a regular file!" << std::endl;
-//             wxMessageBox("Error: Not a regular file!", "Error", wxICON_ERROR);
-//             return false;
+//             wxMessageBox("Cannot determine file type.", "Error", wxOK | wxICON_ERROR);
 //         }
-//     }
-//     else
-//     {
-//         std::cerr << "File does not exist or is a directory." << std::endl;
-//         return false;
 //     }
 // }
 

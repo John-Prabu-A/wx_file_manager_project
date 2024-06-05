@@ -61,6 +61,8 @@ FileIcon::FileIcon(wxWindow *parent, wxString fileName, wxString filePath, const
 
     // Binding events
     parent->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnLeftClick, this);
+    this->Bind(wxEVT_LEFT_DCLICK, &FileIcon::OnDoubleClick, this);
+    this->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnIconClick, this);
     m_iconBitmap->Bind(wxEVT_LEFT_DCLICK, &FileIcon::OnDoubleClick, this);
     m_iconBitmap->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnIconClick, this);
     m_text->Bind(wxEVT_LEFT_DOWN, &FileIcon::OnTextClick, this);
@@ -243,14 +245,14 @@ void FileIcon::InitializeFileIconMap()
     fileIconMap["tar"] = "src/resource/archive_icon.png";
     fileIconMap["gz"] = "src/resource/archive_icon.png";
     fileIconMap["bz2"] = "src/resource/archive_icon.png";
-    fileIconMap["mp3"] = "src/resource/video_icon.png";
-    fileIconMap["wav"] = "src/resource/video_icon.png";
-    fileIconMap["avi"] = "src/resource/video_icon.png";
-    fileIconMap["mp4"] = "src/resource/video_icon.png";
-    fileIconMap["mkv"] = "src/resource/video_icon.png";
-    fileIconMap["mov"] = "src/resource/video_icon.png";
-    fileIconMap["flv"] = "src/resource/video_icon.png";
-    fileIconMap["wmv"] = "src/resource/video_icon.png";
+    fileIconMap["mp3"] = "src/resource/vlc.png";
+    fileIconMap["wav"] = "src/resource/vlc.png";
+    fileIconMap["avi"] = "src/resource/vlc.png";
+    fileIconMap["mp4"] = "src/resource/vlc.png";
+    fileIconMap["mkv"] = "src/resource/vlc.png";
+    fileIconMap["mov"] = "src/resource/vlc.png";
+    fileIconMap["flv"] = "src/resource/vlc.png";
+    fileIconMap["wmv"] = "src/resource/vlc.png";
 }
 
 wxString FileIcon::GetFileExtension(wxString filePath)
